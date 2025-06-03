@@ -1,0 +1,29 @@
+{
+    "@context": "https://www.w3.org/2019/wot/td/v1",
+    "@type": [
+        "Thing",
+        "temperature"
+    ],
+    "title": "TempSensorA",
+    "id": "sensor-001",
+    "security": "nosec_sc",
+    "securityDefinitions": {
+        "nosec_sc": {
+            "scheme": "nosec"
+        }
+    },
+    "properties": {
+        "temperature": {
+            "type": "number",
+            "unit": "celsius",
+            "readOnly": true,
+            "forms": [
+                {
+                    "href": "http://example.org/sensor001/temp",
+                    "contentType": "application/json",
+                    "op": "readproperty"
+                }
+            ]
+        }
+    }
+}
