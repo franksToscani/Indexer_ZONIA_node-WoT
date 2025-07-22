@@ -1,0 +1,18 @@
+[
+    {
+        "requestId": "req-001",
+        "type": "Sensor"
+    },
+    {
+        "requestId": "req-002",
+        "type": "Actuator"
+    },
+    {
+        "requestId": "req-003",
+        "type": "Thing"
+    },
+    {
+        "requestId": "req-004",
+        "type": "temperature"
+    }
+]

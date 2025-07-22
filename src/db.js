@@ -6,7 +6,7 @@ const pool = new Pool({
 });
 
 pool.connect()
-    .then(() => console.log("✅ Connessione a PostgreSQL riuscita"))
-    .catch((err) => console.error("❌ Errore connessione PostgreSQL:", err));
+    .then(() => console.log("Connessione a PostgreSQL riuscita"))
+    .catch((err) => console.error("Errore connessione PostgreSQL:", err));
 
 module.exports = pool;

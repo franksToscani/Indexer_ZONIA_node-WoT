@@ -16,7 +16,7 @@ async function findTDsByType(type) {
         return result.rows.map(row => row.td);
 
     } catch (err) {
-        console.error("❌ Errore nella query:", err);
+        console.error("Errore nella query:", err);
         return [];
     }
 }
@@ -29,6 +29,7 @@ module.exports = { findTDsByType };
  * @param {Array<string>} types - Array di tipi da cercare (es. ["temperature", "humidity"])
  * @returns {Promise<Array>} - Lista delle TD corrispondenti
  */
+
 async function findTDsByTypes(types) {
     if (!Array.isArray(types) || types.length === 0) return [];
 
@@ -41,7 +42,7 @@ async function findTDsByTypes(types) {
         console.log(`🔍 Trovate ${result.rows.length} TD con @type in [${types.join(", ")}]`);
         return result.rows.map(row => row.td);
     } catch (err) {
-        console.error("❌ Errore nella query multipla:", err);
+        console.error("Errore nella query multipla:", err);
         return [];
     }
 }
