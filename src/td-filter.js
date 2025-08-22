@@ -12,7 +12,7 @@ async function findTDsByType(type) {
             [type]
         );
 
-        console.log(`🔍 Trovate ${result.rows.length} TD con @type="${type}"`);
+        console.log(`Trovate ${result.rows.length} TD con @type="${type}"`);
         return result.rows.map(row => row.td);
 
     } catch (err) {
@@ -39,7 +39,7 @@ async function findTDsByTypes(types) {
 
     try {
         const result = await pool.query(query, types);
-        console.log(`🔍 Trovate ${result.rows.length} TD con @type in [${types.join(", ")}]`);
+        console.log(`Trovate ${result.rows.length} TD con @type in [${types.join(", ")}]`);
         return result.rows.map(row => row.td);
     } catch (err) {
         console.error("Errore nella query multipla:", err);
