@@ -94,6 +94,19 @@ node src/oracle.js
 node src/tdLoader.js
 ```
 
+### 🔧 Aggiornamento schema database
+
+Per evitare duplicati nella tabella `td_matches` è necessario aggiungere un vincolo/indice unico sulla coppia `(request_id, td_id)`.
+
+Eseguire il seguente comando sul database PostgreSQL utilizzato dall'indexer:
+
+```sql
+ALTER TABLE td_matches
+    ADD CONSTRAINT td_matches_request_td_unique UNIQUE (request_id, td_id);
+```
+
+Se si dispone di uno script di setup/migrazione del database, aggiungere il comando precedente allo script così da mantenerlo idempotente nei nuovi ambienti.
+
 ---
 
 ## Tecnologie usate

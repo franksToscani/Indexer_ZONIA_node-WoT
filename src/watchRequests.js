@@ -25,8 +25,18 @@ async function watchRequests() {
             }
 
             for (const row of result.rows) {
-                await pool.query(`INSERT INTO td_matches (request_id, td_id) VALUES ($1, $2)`, 
-                    [req.requestId, row.id]);
+
+                const insertResult = await pool.query(`
+                    INSERT INTO td_matches (request_id, td_id)
+                    VALUES ($1, $2)
+                    ON CONFLICT (request_id, td_id) DO NOTHING
+                    RETURNING request_id
+                `, [req.requestId, row.id]);
+
+                if (insertResult.rowCount === 0) {
+                    console.log(`Match già presente: request ${req.requestId} ↔ TD ${row.id}`);
+                    continue;
+                }
 
                 console.log(`Match salvato: request ${req.requestId} ↔ TD ${row.id}`);
                 totalMatches++;
