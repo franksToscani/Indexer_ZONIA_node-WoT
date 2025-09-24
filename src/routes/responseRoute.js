@@ -17,7 +17,15 @@ router.get("/:requestId", async (req, res) => {
             return res.status(404).json({ message: "Nessun match trovato per questa richiesta." });
         }
 
-        const tdList = result.rows.map(row => row.td);
+        // Elimina i duplicati in base a td.id
+        const seen = new Set();
+        const tdList = result.rows
+            .map(row => row.td)
+            .filter(td => {
+                if (seen.has(td.id)) return false;
+                seen.add(td.id);
+                return true;
+            });
 
         res.json({ requestId, matches: tdList });// Restituisce la lista dei TDs trovati
 

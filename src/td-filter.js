@@ -54,3 +54,14 @@ module.exports = { findTDsByType, findTDsByTypes };
  * @param {string} idPrefix - Il prefisso dell'ID da cercare, es. "urn:ngsi-ld:TemperatureSensor:"
  * @returns {Promise<Array>} - Lista delle TD trovate
  */  
+
+
+
+async function test() {
+    // const tds = await findTDsByType("temperature");
+    const tds = await findTDsByTypes(["temperature", "humidity"]);
+    console.log(JSON.stringify(tds, null, 2));
+}
+
+test();
+
