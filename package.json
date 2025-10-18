@@ -4,7 +4,7 @@
   "description": "Implementazione di un componente Indexer che gestisce i metadati semantici secondo l'architettura ZONIA",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \\\"Error: no tests specified\\\" && exit 1"
   },
   "repository": {
     "type": "git",
