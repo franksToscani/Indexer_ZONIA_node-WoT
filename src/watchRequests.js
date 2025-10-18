@@ -1,7 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 const pool = require("./db");
+/**
+    *prende in input un oggetto JSON simile a una richiesta on-chain
 
+    *estrae il tipo richiesto
+
+    *chiama findTDsByType()
+
+    *salva i match nel DB   
+ */
 const requestsPath = path.join(__dirname, "../requests.json");
 
 async function watchRequests() {

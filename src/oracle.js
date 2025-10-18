@@ -1,11 +1,11 @@
 const axios = require("axios");
 
 // Simuliamo una lista di requestId da testare
-const requestIds = ["req-001", "req-002", "req-003", "req-004"];
+const requestIds = ["req-001", "req-002", "req-003", "req-004", "req-005"];
 
 async function fetchMatches(requestId) {
     try {
-        const res = await axios.get(`http://localhost:3000/response/${requestId}`);// Assumendo che il server sia in esecuzione sulla porta 3000
+        const res = await axios.get(`http://localhost:3000/response/${requestId}`);
         console.log(`Risultati per ${requestId}:`);
         console.dir(res.data, { depth: null });
         console.log("\n");
