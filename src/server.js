@@ -3,23 +3,24 @@ const config = require("./config");
 const pool = require("./infrastructure/db");
 
 async function start() {
-    let client;
     try {
-        client = await pool.connect();
-        console.log("Connessione a PostgreSQL riuscita");
+        // Test DB connection
+        // ====== Verifica accesso database ======
+        const client = await pool.connect();
+        console.log("✅ Database connesso");
+        client.release();
+
+        // ====== Creazione applicazione Express ======
+        const app = createApp();
+        
+        // ====== Avvio server HTTP ======
+        app.listen(config.http.port, () => {
+            console.log(`🚀 Server avviato su http://localhost:${config.http.port}`);
+        });
     } catch (error) {
-        console.error("Errore connessione PostgreSQL:", error);
+        console.error("❌ Errore avvio:", error.message);
         process.exit(1);
-    } finally {
-        client?.release();
     }
-
-    const app = createApp();
-    const port = config.http.port;
-
-    app.listen(port, () => {
-        console.log(`Server avviato su http://localhost:${port}`);
-    });
 }
 
 start();

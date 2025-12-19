@@ -1,307 +1,286 @@
-# 🌐 ZONIA Indexer – Semantic Metadata Indexer
+# 🔗 ZONIA Indexer
 
-Implementazione di un componente **Indexer** che gestisce i metadati semantici secondo l'architettura **ZONIA**, un'architettura zero-trust per applicazioni IoT su blockchain. 
-
-Lo scopo dell'indexer è gestire, memorizzare e restituire **Thing Descriptions (TD)** semanticamente compatibili, in risposta a richieste di oracoli esterni.
+Un indexer Node.js che ascolta eventi blockchain, valuta compatibilità di Thing Descriptions (TD) e si offre volontariamente per fornire dati semantici agli oracoli, secondo l'architettura ZONIA.
 
 ---
 
-## 📁 Architettura del Progetto
+## 🎯 Cos'è
 
-La struttura del progetto segue un approccio **Domain-Driven Design (DDD)** per garantire scalabilità e manutenibilità:
+L'indexer è un componente dell'ecosistema ZONIA che:
+
+1. **Memorizza** TD (Thing Descriptions) in un database locale
+2. **Ascolta** smart contract per nuove richieste di dati
+3. **Valuta** se possiede TD compatibili con il tipo richiesto
+4. **Si registra** on-chain offrendosi volontariamente
+5. **Fornisce** i dati agli oracoli via API HTTP
+
+---
+
+## 🏗️ Architettura
+
+```
+┌─────────────────────────────────────────┐
+│     BLOCKCHAIN (IndexerRegistry)        │
+│     BLOCKCHAIN (RequestGate)            │
+└────────┬────────────────────────┬───────┘
+         │ Events                 │
+         │ applyToRequest()       │
+         │                        │
+    ┌────▼────────────────────────▼──┐
+    │   BlockchainService (ethers)   │
+    │   - Listener RequestSubmitted   │
+    │   - Register on-chain          │
+    │   - Apply to requests          │
+    └────┬───────────────────────────┘
+         │
+    ┌────▼──────────────────┐
+    │  TdMatchService       │
+    │  - Ricerca TD         │
+    │  - Valida compatibilità
+    └────┬──────────────────┘
+         │
+    ┌────▼─────────────────┐
+    │  PostgreSQL Database │
+    │  - td_store          │
+    │  - on_chain_log      │
+    └─────────────────────┘
+         │
+         │ HTTP API
+         ▼
+    ┌──────────────┐
+    │   Oracles    │
+    └──────────────┘
+```
+
+---
+
+## 📂 Struttura
 
 ```
 src/
-├── config/                    # Configurazione centralizzata
-│   ├── config.js             # Caricamento variabili env
-│   └── index.js              # Esporta config
-├── core/                      # Logica di business principale
-│   ├── repositories/         # Data access layer
-│   │   ├── tdRepository.js   # CRUD operazioni TD
-│   │   └── matchRepository.js # CRUD operazioni matches
-│   ├── services/             # Business logic
-│   │   ├── matchService.js   # Matching semantico
-│   │   └── tdIngestionService.js # Importazione TD
-│   └── domain/               # Entity e value objects
-│       ├── td.entity.js      # Thing Description entity
-│       └── match.entity.js   # Match entity
-├── api/                       # API layer
-│   ├── controllers/          # Gestione richieste HTTP
-│   │   └── responseController.js
-│   ├── routes/               # Definizione rotte
-│   │   └── responseRoutes.js
-│   ├── middlewares/          # Middleware personalizzati
-│   │   └── errorHandler.js   # Gestione errori globale
-│   └── types/                # DTO e tipi API
-│       └── response.dto.js
+├── config/index.js                  # Configurazione centralizzata
 ├── infrastructure/
-│   └── db.js                 # Connessione PostgreSQL
-├── scripts/                  # Script utili
-│   ├── loadTds.js            # Importa TD da file JSON
-│   └── watchRequests.js      # Elabora richieste
-├── app.js                    # Configurazione Express
-├── server.js                 # Avvio server
-├── index.js                  # Punto di ingresso (compatibilità)
-└── oracle.js                 # Script di test/simulazione
+│   ├── db.js                        # Pool PostgreSQL
+│   └── blockchain.js                # BlockchainService (ethers.js)
+├── core/
+│   ├── repositories/
+│   │   ├── tdRepository.js          # Query TD
+│   │   └── onChainRepository.js     # Log azioni
+│   └── services/
+│       └── tdMatchService.js        # Ricerca TD compatibili
+├── api/
+│   ├── controllers/dataController.js # Endpoint /data/:requestId
+│   ├── routes/dataRoutes.js         # Route definition
+│   └── middlewares/errorHandler.js  # Error handling
+├── contracts/
+│   ├── IndexerRegistry.abi.json     # ABI smart contract
+│   └── RequestGate.abi.json         # ABI smart contract
+├── scripts/
+│   ├── initDb.js                    # Crea tabelle
+│   ├── loadTds.js                   # Carica TD da file
+│   └── listener.js                  # Blockchain listener
+├── app.js                           # Express app
+└── server.js                        # Server startup
 ```
 
 ---
 
-## Funzionalità implementate (Sprint 0 → Sprint 3)
+## ⚡ Quick Start
 
-### 🔹 Sprint 0 – Configurazione ambiente
+### 1. Setup
 
-- Node.js, Express e PostgreSQL installati
-- DB `indexerDB` configurato con la tabella `td_store`
-- Repo collegata a GitHub
-- `.env`, `.gitignore` e struttura cartelle create
+```bash
+npm install
+```
 
-### 🔹 Sprint 1 – Caricamento TD semantiche
+### 2. Configurazione `.env`
 
-- Script `tdLoader.js` per importare automaticamente TD da `/tds`
-- Schema con campo `jsonb` per memorizzare Thing Description
-- Test query semantiche con operatori PostgreSQL su jsonb
+```env
+# Database
+DATABASE_URL=postgres://user:pass@localhost:5432/indexerDB
 
-### 🔹 Sprint 2 – Match tra richieste e TD
+# Blockchain
+RPC_URL=http://localhost:8545
+PRIVATE_KEY=0x...
+INDEXER_DID=did:zonia:indexer:001
+INDEXER_REGISTRY_ADDRESS=0x...
+REQUEST_GATE_ADDRESS=0x...
 
-- Script `watchRequests.js` che simula richieste (`req-001`, `req-002`...)
-- Tabella `td_matches` per salvare relazioni `request_id ↔ td_id`
-- Matching semantico su `@type` delle TD
-- Evitato inserimento duplicati in output con filtro in Node.js
+# Server
+PORT=3000
+TD_LIST_FILE=./tds/td_list.json
+```
 
-### 🔹 Sprint 3 – API di risposta per oracles
+### 3. Inizializzazione
 
-- Endpoint `GET /response/:requestId`
-- Restituisce tutte le TD matchate
-- TD duplicate eliminate con filtro basato su `td.id`
-- Testato con script `oracle.js`
+```bash
+node src/scripts/initDb.js
+node src/scripts/loadTds.js
+```
+
+### 4. Avvio
+
+**Terminal 1 - Blockchain Listener:**
+```bash
+node src/scripts/listener.js
+```
+
+**Terminal 2 - API Server:**
+```bash
+node src/server.js
+```
 
 ---
 
-## 🔌 Endpoint disponibili
+## 🔌 API
 
 ### GET `/`
 
-```txt
-"Indexer ZONIA attivo!"
+```json
+{ "status": "Indexer ZONIA Online" }
 ```
 
-### GET `/response/:requestId`
+### GET `/data/:requestId`
 
-Restituisce la lista di TD semantiche associate a una richiesta (es. `req-001`).
+Fornisce i TD offerti per una richiesta specifica.
 
 **Esempio:**
-
 ```bash
-GET http://localhost:3000/response/req-002
+curl http://localhost:3000/data/0x1234abcd...
 ```
 
 **Risposta:**
-
 ```json
 {
-  "requestId": "req-002",
-  "matches": [
-    {
-      "id": "urn:dev:ops:la-001",
-      "@type": "Actuator",
-      "title": "LightActuator1",
-      ...
-    }
+  "requestId": "0x1234abcd...",
+  "count": 2,
+  "data": [
+    { "id": "td-001", "@type": "Sensor", "title": "Temperature" },
+    { "id": "td-002", "@type": "Sensor", "title": "Humidity" }
   ]
 }
 ```
 
 ---
 
----
-
-## 🚀 Guida di utilizzo
-
-### Prerequisiti
-
-- **Node.js** v14+
-- **PostgreSQL** con database `indexerDB`
-- **npm** (dipendenze: `express`, `body-parser`, `pg`, `dotenv`, `axios`)
-
-### 1️⃣ Configurazione
-
-Crea un file `.env` nella root:
-
-```env
-PORT=3000
-DATABASE_URL=postgres://user:password@localhost:5432/indexerDB
-REQUESTS_FILE=./requests.json
-TD_LIST_FILE=./tds/td_list.json
-```
-
-### 2️⃣ Installazione dipendenze
-
-```bash
-npm install
-```
-
-### 3️⃣ Caricamento TD nel database
-
-```bash
-node src/scripts/loadTds.js
-```
-
-Questo script importa le TD da `tds/td_list.json` e le memorizza in PostgreSQL.
-
-### 4️⃣ Elaborazione richieste
-
-```bash
-node src/scripts/watchRequests.js
-```
-
-Questo script legge da `requests.json` e crea i match nel database.
-
-### 5️⃣ Avvia il server
-
-```bash
-node src/server.js
-```
-
-Server avviato su `http://localhost:3000`
-
-### 6️⃣ Test dell'API
-
-```bash
-node src/oracle.js
-```
-
-Script che simula richieste all'API per verificare i match.
-
----
-
-## 📊 Flusso dati
+## 🔄 Flusso Operativo
 
 ```
-tds/td_list.json
-      ↓
-  loadTds.js
-      ↓
-  tdIngestionService
-      ↓
-  tdRepository.insertTd()
-      ↓
-  PostgreSQL (td_store)
-      
-requests.json
-      ↓
-  watchRequests.js
-      ↓
-  matchService.createMatchesForRequest()
-      ↓
-  matchRepository.insertMatch()
-      ↓
-  PostgreSQL (td_matches)
-      
-GET /response/:requestId
-      ↓
-  responseController.getResponse()
-      ↓
-  matchService.getMatchesForRequest()
-      ↓
-  matchRepository.findTdMatchesByRequestId()
-      ↓
-  JSON response
+1. BlockchainService.registerIndexer()
+   └─ Chiama: indexerRegistry.register(did)
+
+2. BlockchainService.listenToRequests()
+   └─ Ascolta: event RequestSubmitted(requestId, requiredType)
+
+3. TdMatchService.findCompatibleTds(requiredType)
+   └─ Query: SELECT td FROM td_store WHERE td->>'@type' = ?
+
+4. BlockchainService.applyToRequest(requestId)
+   └─ Chiama: requestGate.applyToRequest(did, requestId)
+
+5. BlockchainService.storeOfferedTds(requestId, tds)
+   └─ Salva in memoria: { requestId => [td1, td2, ...] }
+
+6. Oracle richiede: GET /data/requestId
+   └─ BlockchainService.getOfferedTds(requestId)
+      └─ Ritorna TD memorizzati
 ```
 
 ---
 
-## 🔧 Schema database
-
-### Tabella `td_store`
+## 📊 Database Schema
 
 ```sql
+-- Thing Descriptions
 CREATE TABLE td_store (
     id SERIAL PRIMARY KEY,
     td JSONB NOT NULL
 );
-```
 
-### Tabella `td_matches`
-
-```sql
-CREATE TABLE td_matches (
+-- Log azioni on-chain
+CREATE TABLE on_chain_log (
     id SERIAL PRIMARY KEY,
     request_id TEXT NOT NULL,
-    td_id INTEGER NOT NULL REFERENCES td_store(id),
-    UNIQUE(request_id, td_id)
+    action TEXT NOT NULL,
+    tx_hash TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 ---
 
-## 🎯 Patterns e Best Practices
+## 🔗 Smart Contract Functions
 
-### ✅ Repository Pattern
-Data access centralizzato in `src/core/repositories/`
+### IndexerRegistry
 
-### ✅ Service Layer
-Logica di business in `src/core/services/`
+```solidity
+function register(string memory did) public {
+    super.register(did);
+    emit Events.IndexerRegistered(did, msg.sender);
+}
+```
 
-### ✅ Dependency Injection (DI)
-Struttura modulare facilita i test
+### RequestGate
 
-### ✅ Entity Domain Objects
-Entity separate da DTO per una chiara separazione dei concerns
-
-### ✅ Error Handling
-Middleware centralizzato in `src/api/middlewares/errorHandler.js`
+```solidity
+function applyToRequest(
+    string memory did,
+    bytes32 requestId
+) external onlyIndexer(did) isRequestInStatus(...) {
+    // Indexer si offre volontariamente
+    emit Events.IndexerVolunteer(requestId, indexer);
+}
+```
 
 ---
 
-## 📝 Ambiente di sviluppo
+## 🔑 Variabili d'Ambiente
+
+| Variabile | Descrizione |
+|-----------|-------------|
+| `DATABASE_URL` | Connessione PostgreSQL |
+| `RPC_URL` | Endpoint blockchain (Ethereum, Sepolia, etc.) |
+| `PRIVATE_KEY` | Chiave privata indexer (senza `0x` prefix) |
+| `INDEXER_DID` | DID univoco dell'indexer |
+| `INDEXER_REGISTRY_ADDRESS` | Indirizzo smart contract registry |
+| `REQUEST_GATE_ADDRESS` | Indirizzo smart contract gate |
+| `PORT` | Porta HTTP (default: 3000) |
+| `TD_LIST_FILE` | Path file TD JSON |
+
+---
+
+## 🛠️ Comandi Utili
 
 ```bash
-# Avvia in modalità watch (richiede nodemon)
-npm install --save-dev nodemon
-npx nodemon src/server.js
+# Setup database
+node src/scripts/initDb.js
+
+# Carica TD
+node src/scripts/loadTds.js
+
+# Avvia listener blockchain
+node src/scripts/listener.js
+
+# Avvia server API
+node src/server.js
+
+# Test endpoint
+curl http://localhost:3000/data/0x...
 ```
 
 ---
 
-## 🤝 Contribuire
+## 📦 Dipendenze
 
-Per aggiungere nuove feature:
-
-1. Crea una nuova branch: `git checkout -b feature/nome-feature`
-2. Implementa i cambiamenti
-3. Fai un commit: `git commit -m "feat: descrizione"`
-4. Push alla branch: `git push origin feature/nome-feature`
-5. Apri una Pull Request
+- `express` - Web framework
+- `pg` - PostgreSQL driver
+- `ethers` - Blockchain interaction
+- `dotenv` - Environment variables
 
 ---
 
-## 📄 Licenza
+## 📝 Licenza
 
 ISC
-
-Eseguire il seguente comando sul database PostgreSQL utilizzato dall'indexer:
-
-```sql
-ALTER TABLE td_matches
-    ADD CONSTRAINT td_matches_request_td_unique UNIQUE (request_id, td_id);
-```
-
-Se si dispone di uno script di setup/migrazione del database, aggiungere il comando precedente allo script così da mantenerlo idempotente nei nuovi ambienti.
-
----
-
-## Tecnologie usate
-
-- Node.js / Express
-- PostgreSQL con campo `jsonb`
-- Librerie: `pg`, `axios`, `dotenv`, `fs`, `path`, `body-parser`
-
----
-
-## ⏭Prossimo Sprint – Sprint 4
-
-- Simulare registrazione on-chain (`registerIndexer`, `registerAvailability`)
-- Logging avanzato
 - Pulizia e rifinitura del codice
 - Documentazione finale per tesi

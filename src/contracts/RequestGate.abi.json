@@ -1,0 +1,33 @@
+[
+    {
+        "type": "event",
+        "name": "RequestSubmitted",
+        "inputs": [
+            {
+                "name": "requestId",
+                "type": "bytes32",
+                "indexed": true
+            },
+            {
+                "name": "requiredType",
+                "type": "string",
+                "indexed": false
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "applyToRequest",
+        "inputs": [
+            {
+                "name": "did",
+                "type": "string"
+            },
+            {
+                "name": "requestId",
+                "type": "bytes32"
+            }
+        ],
+        "outputs": []
+    }
+]

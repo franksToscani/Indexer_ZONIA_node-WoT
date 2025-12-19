@@ -1,0 +1,13 @@
+[
+    {
+        "type": "function",
+        "name": "register",
+        "inputs": [
+            {
+                "name": "did",
+                "type": "string"
+            }
+        ],
+        "outputs": []
+    }
+]
