@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const responseRoutes = require("./routes/responseRoutes");
+const responseRoutes = require("./api/routes/responseRoutes");
+const errorHandler = require("./api/middlewares/errorHandler");
 
 function createApp() {
     const app = express();
@@ -13,10 +14,7 @@ function createApp() {
 
     app.use("/response", responseRoutes);
 
-    app.use((err, req, res, next) => {
-        console.error("Errore nell'applicazione:", err);
-        res.status(500).json({ error: "Errore interno del server" });
-    });
+    app.use(errorHandler);
 
     return app;
 }

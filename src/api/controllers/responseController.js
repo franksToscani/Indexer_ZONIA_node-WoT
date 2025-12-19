@@ -1,4 +1,4 @@
-const matchService = require("../services/matchService");
+const matchService = require("../../core/services/matchService");
 
 async function getResponse(req, res, next) {
     try {

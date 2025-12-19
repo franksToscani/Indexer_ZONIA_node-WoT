@@ -1,7 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
-const config = require("../config");
-const tdRepository = require("../models/tdRepository");
+const config = require("../../config");
+const tdRepository = require("../repositories/tdRepository");
 
 async function importFromFile(filePath = config.paths.tdList) {
     const resolvedPath = path.resolve(filePath);

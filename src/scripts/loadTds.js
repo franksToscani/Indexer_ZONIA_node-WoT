@@ -1,4 +1,4 @@
-const tdIngestionService = require("../services/tdIngestionService");
+const tdIngestionService = require("../core/services/tdIngestionService");
 const pool = require("../infrastructure/db");
 
 async function main() {

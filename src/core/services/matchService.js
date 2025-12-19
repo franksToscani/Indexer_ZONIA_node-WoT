@@ -1,5 +1,5 @@
-const matchRepository = require("../models/matchRepository");
-const tdRepository = require("../models/tdRepository");
+const matchRepository = require("../repositories/matchRepository");
+const tdRepository = require("../repositories/tdRepository");
 
 async function getMatchesForRequest(requestId) {
     const rows = await matchRepository.findTdMatchesByRequestId(requestId);

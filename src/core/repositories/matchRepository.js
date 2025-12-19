@@ -1,11 +1,11 @@
-const pool = require("../infrastructure/db");
+const pool = require("../../infrastructure/db");
 
 async function findTdMatchesByRequestId(requestId, client = pool) {
     const { rows } = await client.query(
         `SELECT t.id, t.td
-         FROM td_matches m
-         JOIN td_store t ON m.td_id = t.id
-         WHERE m.request_id = $1`,
+        FROM td_matches m
+        JOIN td_store t ON m.td_id = t.id
+        WHERE m.request_id = $1`,
         [requestId],
     );
 

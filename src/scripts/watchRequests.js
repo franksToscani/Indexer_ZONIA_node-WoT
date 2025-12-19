@@ -1,5 +1,5 @@
 const fs = require("fs/promises");
-const matchService = require("../services/matchService");
+const matchService = require("../core/services/matchService");
 const config = require("../config");
 const pool = require("../infrastructure/db");
 
