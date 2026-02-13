@@ -58,81 +58,165 @@ L'indexer è un componente dell'ecosistema ZONIA che:
 
 ```
 src/
-├── config/index.js                  # Configurazione centralizzata
+├── app.js                           # Express app
+├── server.js                        # Server startup
+├── config/
+│   └── index.js                     # Configurazione centralizzata
 ├── infrastructure/
 │   ├── db.js                        # Pool PostgreSQL
 │   └── blockchain.js                # BlockchainService (ethers.js)
 ├── core/
 │   ├── repositories/
-│   │   ├── tdRepository.js          # Query TD
-│   │   └── onChainRepository.js     # Log azioni
+│   │   └── tdRepository.js          # Query TD JSONB
 │   └── services/
 │       └── tdMatchService.js        # Ricerca TD compatibili
 ├── api/
-│   ├── controllers/dataController.js # Endpoint /data/:requestId
-│   ├── routes/dataRoutes.js         # Route definition
-│   └── middlewares/errorHandler.js  # Error handling
-├── contracts/
-│   ├── IndexerRegistry.abi.json     # ABI smart contract
-│   └── RequestGate.abi.json         # ABI smart contract
+│   ├── controllers/
+│   │   └── dataController.js        # Endpoint GET /data/:requestId
+│   ├── routes/
+│   │   └── dataRoutes.js            # Route definition
+│   └── middlewares/
+│       └── errorHandler.js          # Error handling
 ├── scripts/
-│   ├── initDb.js                    # Crea tabelle
-│   ├── loadTds.js                   # Carica TD da file
-│   └── listener.js                  # Blockchain listener
-├── app.js                           # Express app
-└── server.js                        # Server startup
+│   ├── initDb.js                    # Crea schema database
+│   ├── loadTds.js                   # Carica TD da JSON
+│   └── listener.js                  # MAIN: Blockchain listener
+└── contracts/
+    ├── IndexerRegistry.sol          # Contract source
+    ├── Gate.sol                     # Contract source
+    └── common/                      # Librerie di supporto
+
+tds/
+└── td_list.json                     # Thing Descriptions data
+
+.env                                 # Configurazione (NON committare!)
+.env.example                         # Template configurazione
+package.json                         # Dipendenze
+README.md                            # Questo file
 ```
 
 ---
 
 ## ⚡ Quick Start
 
-### 1. Setup
+### 1. Clone e dipendenze
 
 ```bash
+cd Indexer_ZONIA_node-WoT
 npm install
 ```
 
 ### 2. Configurazione `.env`
 
-```env
-# Database
-DATABASE_URL=postgres://user:pass@localhost:5432/indexerDB
-
-# Blockchain
-RPC_URL=http://localhost:8545
-PRIVATE_KEY=0x...
-INDEXER_DID=did:zonia:indexer:001
-INDEXER_REGISTRY_ADDRESS=0x...
-REQUEST_GATE_ADDRESS=0x...
-
-# Server
-PORT=3000
-TD_LIST_FILE=./tds/td_list.json
+```bash
+cp .env.example .env
+# Edita .env con i tuoi parametri:
+# - DATABASE_URL
+# - RPC_URL
+# - PRIVATE_KEY (con fondi!)
+# - INDEXER_DID
+# - INDEXER_REGISTRY_ADDRESS
+# - REQUEST_GATE_ADDRESS
 ```
 
-### 3. Inizializzazione
+### 3. Inizializzazione Database
 
 ```bash
+# Crea le tabelle in PostgreSQL
 node src/scripts/initDb.js
+
+# Carica le Thing Descriptions dal file
 node src/scripts/loadTds.js
 ```
 
 ### 4. Avvio
 
-**Terminal 1 - Blockchain Listener:**
+**Option A: Due terminali separati**
+
 ```bash
+# Terminal 1: Blockchain listener (principale)
 node src/scripts/listener.js
+
+# Terminal 2: API server (serve i TD agli oracoli)
+npm start
+# oppure
+node src/server.js
 ```
 
-**Terminal 2 - API Server:**
+**Option B: Backgroundare il listener**
 ```bash
-node src/server.js
+# Avvia il listener in background
+node src/scripts/listener.js &
+
+# Avvia il server
+npm start
 ```
 
 ---
 
-## 🔌 API
+## ✅ Verifica che tutto funzioni
+
+### 1. Database inizializzato
+```bash
+# Controlla che le tabelle siano state create
+# Esegui initDb.js: dovrebbe mostrare "✅ Tabelle create"
+```
+
+### 2. TD caricate
+```bash
+# Controlla che i dati siano stati inseriti
+# Esegui loadTds.js: dovrebbe mostrare numero di TD caricate
+# Es: ✨ Caricati 3 TD nel database
+```
+
+### 3. Listener attivo
+```bash
+# Il listener dovrebbe mostrare:
+# 🔗 Inizializzazione Blockchain Service...
+# 📝 Registrazione on-chain...
+# ✅ Registrato on-chain - TX: 0x...
+# 👂 In ascolto di RequestSubmitted...
+```
+
+### 4. API raggiungibile
+```bash
+curl http://localhost:3000/
+# Response: { "status": "Indexer ZONIA Online" }
+```
+
+---
+
+## � Architettura ad alto livello
+
+```
+Cosa fa il tuo Indexer:
+
+1. REGISTRATION PHASE
+   ├─ registerIndexer() → IndexerRegistry.register(did)
+   ├─ Salvi il DID on-chain
+   └─ Emetti: IndexerRegistered(did, address)
+
+2. LISTENING PHASE (continuo)
+   ├─ listenToRequests() → Ascolti evento RequestSubmitted
+   ├─ Per ogni richiesta ricevuta:
+   │  ├─ findCompatibleTds(requiredType) → Cerchi nel DB
+   │  ├─ if (tds found):
+   │  │  ├─ applyToRequest(requestId) → Chiami contratto
+   │  │  └─ storeOfferedTds(requestId, tds) → Salvi in memoria
+   │  └─ if (no tds):
+   │     └─ Aspetta prossima richiesta
+   │
+   └─ Loop su nuovo evento RequestSubmitted
+
+3. DATA SERVING PHASE (on-demand)
+   ├─ Oracle: GET /data/:requestId
+   ├─ dataController ritrova TD in memoria
+   └─ Response: JSON con TD
+```
+
+---
+
+## �🔌 API
 
 ### GET `/`
 
@@ -279,7 +363,86 @@ curl http://localhost:3000/data/0x...
 
 ---
 
-## 📝 Licenza
+## 🆘 Troubleshooting
+
+### ❌ "Cannot find module 'pg'"
+**Soluzione:**
+```bash
+npm install
+npm install --save pg ethers express dotenv
+```
+
+### ❌ "connect ECONNREFUSED - PostgreSQL non raggiungibile"
+**Soluzione:**
+1. Assicurati che PostgreSQL sia in running
+2. Verifica DATABASE_URL nel .env
+3. Prova connessione:
+   ```bash
+   psql "postgresql://user:password@localhost:5432/indexerDB"
+   ```
+
+### ❌ "Invalid PRIVATE_KEY" o "Not Indexer" dal contratto
+**Soluzione:**
+1. Verifica che il PRIVATE_KEY abbia il prefisso `0x`
+2. Assicurati che l'account abbia ETH/fondi per gas
+3. Verifica che PRIVATE_KEY corrisponda a INDEXER_DID registrato
+
+### ❌ "RequestGate event not firing"
+**Soluzione:**
+1. Verifica RPC_URL sia corretto
+2. Verifica REQUEST_GATE_ADDRESS sia corretto su quella blockchain
+3. Assicurati che il contratto sia deployato
+
+### ❌ "404 - Nessun TD disponibile" su GET /data/:requestId
+**Soluzione:**
+1. Verifica che il requestId sia corretto
+2. Verifica che il tuo indexer si sia iscritto a quella richiesta (IndexerVolunteer event)
+3. Controlla che i TD siano stati caricati correttamente:
+   ```bash
+   node src/scripts/loadTds.js
+   ```
+
+### ❌ "No Thing Descriptions compatible con tipo..."
+**Soluzione:**
+1. Controlla il tipo richiesto corrisponda al @type nel td_list.json
+2. Verifica la query JSONB:
+   ```javascript
+   // Nel DB, @type può essere:
+   // Stringa: td->>'@type' = 'Sensor'
+   // Array: td->'@type' @> '["Sensor"]'
+   ```
+
+---
+
+## 📚 Documentazione Utile
+
+- [Ethers.js v6 Docs](https://docs.ethers.org/v6/)
+- [PostgreSQL JSONB](https://www.postgresql.org/docs/current/datatype-json.html)
+- [W3C WoT Thing Descriptions](https://www.w3.org/TR/wot-thing-description/)
+- [ZONIA Architecture](./Articolo%20su%20ZONIA.pdf)
+
+---
+
+## 📝 Note per la Tesi
+
+Questo indexer implementa un **nodo decentralizzato di indicizzazione** per il sistema ZONIA:
+
+- **Ruolo**: Fornitore volontario di dati semantici (Thing Descriptions)
+- **Architettura**: Off-chain (Node.js) + On-chain (Smart Contracts)
+- **Protocolo**: Event-driven con blockchain listener
+- **Database**: PostgreSQL con query JSONB per semantica TD
+- **API**: REST per servire dati agli oracoli
+- **Sicurezza**: Gestione private key, validazione on-chain
+
+Espandi questa base per aggiungere:
+- Auth token per API
+- Caching avanzato
+- Scoring dinamico
+- Query semantica avanzata
+
+---
+
+## 📄 Licenza
 
 ISC
 - Pulizia e rifinitura del codice
