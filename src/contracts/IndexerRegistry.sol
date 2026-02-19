@@ -8,7 +8,7 @@ import "./common/libraries/types/Events.sol";
 import "./Registry.sol";
 
 contract IndexerRegistry is Registry {
-   constructor(address gateAddress, address zoniaTokenAddress) Registry(gateAddress, zoniaTokenAddress) {
+    constructor(address gateAddress, address zoniaTokenAddress) Registry(gateAddress, zoniaTokenAddress) {
         _stakeAmount = Constants.DEFAULT_INDEXER_REQUIRED_STAKE;
     }
 

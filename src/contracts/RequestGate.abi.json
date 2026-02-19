@@ -1,0 +1,136 @@
+[
+  {
+    "type": "event",
+    "name": "RequestSubmitted",
+    "anonymous": false,
+    "inputs": [
+      {
+        "name": "requestId",
+        "type": "bytes32",
+        "indexed": true
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "applyToRequest",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "name": "did",
+        "type": "string"
+      },
+      {
+        "name": "requestId",
+        "type": "bytes32"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "getRequest",
+    "stateMutability": "view",
+    "inputs": [
+      {
+        "name": "requestId",
+        "type": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "components": [
+          {
+            "name": "query",
+            "type": "string"
+          },
+          {
+            "name": "chainParams",
+            "type": "tuple",
+            "components": [
+              {
+                "name": "w1",
+                "type": "uint256"
+              },
+              {
+                "name": "w2",
+                "type": "uint256"
+              },
+              {
+                "name": "w3",
+                "type": "uint256"
+              },
+              {
+                "name": "w4",
+                "type": "uint256"
+              }
+            ]
+          },
+          {
+            "name": "consumer",
+            "type": "address"
+          },
+          {
+            "name": "fee",
+            "type": "uint256"
+          },
+          {
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "name": "ko",
+            "type": "uint256"
+          },
+          {
+            "name": "ki",
+            "type": "uint256"
+          },
+          {
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "name": "result",
+            "type": "string"
+          },
+          {
+            "name": "indexers",
+            "type": "tuple[]",
+            "components": [
+              {
+                "name": "did",
+                "type": "string"
+              },
+              {
+                "name": "addr",
+                "type": "address"
+              }
+            ]
+          },
+          {
+            "name": "committee",
+            "type": "tuple[]",
+            "components": [
+              {
+                "name": "did",
+                "type": "string"
+              },
+              {
+                "name": "addr",
+                "type": "address"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

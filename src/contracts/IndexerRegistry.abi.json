@@ -1,0 +1,14 @@
+[
+  {
+    "type": "function",
+    "name": "register",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "name": "did",
+        "type": "string"
+      }
+    ],
+    "outputs": []
+  }
+]

@@ -2,11 +2,21 @@ const { ethers } = require("ethers");
 const fs = require("fs");
 const path = require("path");
 
+function formatBlockchainError(error) {
+    return (
+        error?.shortMessage ||
+        error?.reason ||
+        error?.info?.error?.message ||
+        error?.message ||
+        "Errore blockchain sconosciuto"
+    );
+}
+
 class BlockchainService {
     /**
      * BlockchainService
      * 
-     * Centrale per tutte le interazioni blockchain tramite ethers.js v6.
+     * Centrale per tutte le interazioni blockchain tramite ethers.js.
      * Gestisce:
      * - Connessione al nodo blockchain (JSON-RPC)
      * - Firma delle transazioni
@@ -14,7 +24,7 @@ class BlockchainService {
      * - Event listener per RequestSubmitted
      * - Memorizzazione temporanea dei TD offerti
      * 
-     * Architettura ethers.js v6:
+     * Architettura ethers.js:
      * - Provider: connessione read-only al nodo blockchain
      * - Wallet: firma delle transazioni con private key
      * - Contract: interfaccia per interagire con smart contract
@@ -102,7 +112,7 @@ class BlockchainService {
             console.log(`✅ Registrato on-chain - TX: ${receipt.hash}`);
             return receipt.hash;
         } catch (error) {
-            console.error("❌ Errore registrazione:", error.message);
+            console.error("❌ Errore registrazione:", formatBlockchainError(error));
             throw error;
         }
     }
@@ -117,12 +127,22 @@ class BlockchainService {
      */
     listenToRequests(onRequestHandler) {
         console.log("👂 In ascolto di RequestSubmitted...");
-        
-        this.requestGate.on("RequestSubmitted", async (requestId, requiredType) => {
+
+        this.requestGate.on("RequestSubmitted", async (requestId, sender) => {
             console.log(`\n📢 Nuova richiesta ricevuta!`);
             console.log(`   RequestID: ${requestId}`);
-            console.log(`   Tipo richiesto: ${requiredType}`);
-            
+            console.log(`   Sender: ${sender}`);
+
+            let requiredType = "";
+            try {
+                const request = await this.requestGate.getRequest(requestId);
+                requiredType = request.query;
+                console.log(`   Query richiesta: ${requiredType}`);
+            } catch (error) {
+                console.error("❌ Impossibile leggere la richiesta on-chain:", formatBlockchainError(error));
+                return;
+            }
+
             await onRequestHandler(requestId, requiredType);
         });
     }
@@ -152,7 +172,7 @@ class BlockchainService {
             console.log(`✅ Iscritto con successo - TX: ${receipt.hash}`);
             return receipt.hash;
         } catch (error) {
-            console.error("❌ Errore iscrizione:", error.message);
+            console.error("❌ Errore iscrizione:", formatBlockchainError(error));
             throw error;
         }
     }

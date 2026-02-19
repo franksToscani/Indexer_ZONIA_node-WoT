@@ -17,9 +17,6 @@ const pool = require("../../infrastructure/db");
 
 /**
  * Valida che una TD abbia una struttura minima corretta
- * @private
- * @param {Object} td - Thing Description da validare
- * @throws {Error} Se la TD non è valida
  */
 function validateTd(td) {
     if (!td || typeof td !== "object") {
@@ -32,9 +29,6 @@ function validateTd(td) {
 
 /**
  * Valida che il tipo sia una stringa non vuota
- * @private
- * @param {string} type - Tipo da validare
- * @throws {Error} Se il tipo non è valido
  */
 function validateType(type) {
     if (!type || typeof type !== "string" || type.trim() === "") {
@@ -100,17 +94,18 @@ async function findTdsByIds(ids, client = pool) {
             console.log("ℹ️ Nessun ID fornito per la ricerca");
             return [];
         }
-        
-        // Validazione: controlla che gli ID siano numeri
-        if (!Array.isArray(ids) || !ids.every(id => Number.isInteger(id))) {
-            throw new Error("IDs devono essere un array di numeri interi");
+
+        if (!Array.isArray(ids)) {
+            throw new Error("IDs deve essere un array");
         }
-        
+
+        const normalizedIds = ids.map((id) => String(id));
+
         const { rows } = await client.query(
-            "SELECT id, td FROM td_store WHERE id = ANY($1::int[])",
-            [ids]
+            "SELECT id, td FROM td_store WHERE id::text = ANY($1::text[])",
+            [normalizedIds]
         );
-        
+
         console.log(`✅ Recuperate ${rows.length} TD dai ${ids.length} ID requestati`);
         return rows;
     } catch (error) {
@@ -124,7 +119,4 @@ module.exports = {
     insertTd,
     findTdIdsByType,
     findTdsByIds,
-    countTdsByType,
-    deleteTd,
-    getTotalTdCount,
 };

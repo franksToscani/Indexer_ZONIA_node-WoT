@@ -49,6 +49,7 @@ abstract contract Registry is IRegistry, GateControllable {
         _stakings.remove(msg.sender);
     }
 
+
     function ban(address addr) public override onlyGate {
         string memory did = _addresses[addr];
 

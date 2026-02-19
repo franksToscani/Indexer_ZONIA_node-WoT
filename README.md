@@ -80,7 +80,8 @@ src/
 ├── scripts/
 │   ├── initDb.js                    # Crea schema database
 │   ├── loadTds.js                   # Carica TD da JSON
-│   └── listener.js                  # MAIN: Blockchain listener
+│   ├── listener.js                  # MAIN: Blockchain listener
+│   └── getRegisteredDid.js          # Verifica DID registrato on-chain
 └── contracts/
     ├── IndexerRegistry.sol          # Contract source
     ├── Gate.sol                     # Contract source
@@ -123,10 +124,12 @@ cp .env.example .env
 
 ```bash
 # Crea le tabelle in PostgreSQL
-node src/scripts/initDb.js
+npm run db:init
+# oppure: node src/scripts/initDb.js
 
 # Carica le Thing Descriptions dal file
-node src/scripts/loadTds.js
+npm run td:load
+# oppure: node src/scripts/loadTds.js
 ```
 
 ### 4. Avvio
@@ -135,12 +138,12 @@ node src/scripts/loadTds.js
 
 ```bash
 # Terminal 1: Blockchain listener (principale)
-node src/scripts/listener.js
+npm run listener
+# oppure: node src/scripts/listener.js
 
 # Terminal 2: API server (serve i TD agli oracoli)
 npm start
-# oppure
-node src/server.js
+# oppure: node src/server.js
 ```
 
 **Option B: Backgroundare il listener**
@@ -182,6 +185,18 @@ npm start
 ```bash
 curl http://localhost:3000/
 # Response: { "status": "Indexer ZONIA Online" }
+```
+
+### 5. Verifica DID registrato (opzionale)
+```bash
+# Controlla se sei già registrato on-chain
+npm run did:lookup
+# oppure: node src/scripts/getRegisteredDid.js
+
+# Se registrato, mostra:
+# ✅ DID trovato: did:zonia:indexer-frank
+# Se non ancora registrato:
+# ⚠️ Nessun evento IndexerRegistered trovato
 ```
 
 ---
@@ -254,18 +269,21 @@ curl http://localhost:3000/data/0x1234abcd...
    └─ Chiama: indexerRegistry.register(did)
 
 2. BlockchainService.listenToRequests()
-   └─ Ascolta: event RequestSubmitted(requestId, requiredType)
+   └─ Ascolta: event RequestSubmitted(requestId, sender)
 
-3. TdMatchService.findCompatibleTds(requiredType)
+3. Evento ricevuto → legge dettagli richiesta
+   └─ requestGate.getRequest(requestId) → ottiene query
+
+4. TdMatchService.findCompatibleTds(query)
    └─ Query: SELECT td FROM td_store WHERE td->>'@type' = ?
 
-4. BlockchainService.applyToRequest(requestId)
+5. BlockchainService.applyToRequest(requestId)
    └─ Chiama: requestGate.applyToRequest(did, requestId)
 
-5. BlockchainService.storeOfferedTds(requestId, tds)
+6. BlockchainService.storeOfferedTds(requestId, tds)
    └─ Salva in memoria: { requestId => [td1, td2, ...] }
 
-6. Oracle richiede: GET /data/requestId
+7. Oracle richiede: GET /data/requestId
    └─ BlockchainService.getOfferedTds(requestId)
       └─ Ritorna TD memorizzati
 ```
@@ -277,13 +295,13 @@ curl http://localhost:3000/data/0x1234abcd...
 ```sql
 -- Thing Descriptions
 CREATE TABLE td_store (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     td JSONB NOT NULL
 );
 
--- Log azioni on-chain
+-- Log azioni on-chain (opzionale)
 CREATE TABLE on_chain_log (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     request_id TEXT NOT NULL,
     action TEXT NOT NULL,
     tx_hash TEXT,
@@ -320,16 +338,17 @@ function applyToRequest(
 
 ## 🔑 Variabili d'Ambiente
 
-| Variabile | Descrizione |
-|-----------|-------------|
-| `DATABASE_URL` | Connessione PostgreSQL |
-| `RPC_URL` | Endpoint blockchain (Ethereum, Sepolia, etc.) |
-| `PRIVATE_KEY` | Chiave privata indexer (senza `0x` prefix) |
-| `INDEXER_DID` | DID univoco dell'indexer |
-| `INDEXER_REGISTRY_ADDRESS` | Indirizzo smart contract registry |
-| `REQUEST_GATE_ADDRESS` | Indirizzo smart contract gate |
-| `PORT` | Porta HTTP (default: 3000) |
-| `TD_LIST_FILE` | Path file TD JSON |
+| Variabile | Descrizione | Esempio |
+|-----------|-------------|----------|
+| `DATABASE_URL` | Connessione PostgreSQL | `postgresql://user:pass@localhost:5432/indexerDB` |
+| `RPC_URL` | Endpoint blockchain | `http://localhost:8545` |
+| `PRIVATE_KEY` | Chiave privata indexer (con `0x`) | `0xac09...` |
+| `INDEXER_DID` | DID univoco dell'indexer | `did:zonia:indexer-frank` |
+| `INDEXER_REGISTRY_ADDRESS` | Indirizzo smart contract registry | `0x5FbDB...` |
+| `REQUEST_GATE_ADDRESS` | Indirizzo smart contract gate | `0xe7f1...` |
+| `PORT` | Porta HTTP (default: 3000) | `3000` |
+| `TD_LIST_FILE` | Path file TD JSON | `tds/td_list.json` |
+| `GAS_LIMIT` | Limite gas transazioni | `500000` |
 
 ---
 
@@ -337,20 +356,36 @@ function applyToRequest(
 
 ```bash
 # Setup database
-node src/scripts/initDb.js
+npm run db:init
 
 # Carica TD
-node src/scripts/loadTds.js
+npm run td:load
+
+# Verifica DID registrato
+npm run did:lookup
 
 # Avvia listener blockchain
-node src/scripts/listener.js
+npm run listener
 
 # Avvia server API
-node src/server.js
+npm start
 
-# Test endpoint
+# Test endpoint health
+curl http://localhost:3000/
+
+# Test endpoint dati
 curl http://localhost:3000/data/0x...
 ```
+
+### Script NPM disponibili
+
+| Comando | Descrizione |
+|---------|-------------|
+| `npm start` | Avvia API server |
+| `npm run listener` | Avvia blockchain listener |
+| `npm run db:init` | Inizializza database |
+| `npm run td:load` | Carica Thing Descriptions |
+| `npm run did:lookup` | Verifica DID registrato on-chain |
 
 ---
 
@@ -387,6 +422,19 @@ npm install --save pg ethers express dotenv
 2. Assicurati che l'account abbia ETH/fondi per gas
 3. Verifica che PRIVATE_KEY corrisponda a INDEXER_DID registrato
 
+### ❌ Errore durante `register()`: "Stake transfer failed"
+**Soluzione:**
+1. Il contratto `register()` richiede **token ZONIA come stake**
+2. Verifica che il tuo wallet abbia token ZONIA
+3. Approva lo stake: chiama `approve(IndexerRegistryAddress, stakeAmount)` sul token ZONIA
+4. Poi riprova `register(did)`
+
+### ❌ "INDEXER_REGISTRY_ADDRESS non valido"
+**Soluzione:**
+1. Verifica che gli indirizzi in `.env` siano reali (0x...)
+2. Non usare placeholder `0x...`
+3. Chiedi al tutore gli indirizzi deployati corretti
+
 ### ❌ "RequestGate event not firing"
 **Soluzione:**
 1. Verifica RPC_URL sia corretto
@@ -411,6 +459,40 @@ npm install --save pg ethers express dotenv
    // Stringa: td->>'@type' = 'Sensor'
    // Array: td->'@type' @> '["Sensor"]'
    ```
+
+---
+
+## 🆔 Cos'è il DID (Decentralized Identifier)?
+
+Il **DID** è un identificatore univoco che rappresenta il tuo indexer nel sistema ZONIA.
+
+**Formato standard W3C:**
+```
+did:metodo:identificatore-specifico
+```
+
+**Esempi validi:**
+```
+did:zonia:indexer-frank
+did:zonia:my-indexer-001
+did:example:0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```
+
+**Come funziona:**
+1. Scegli un DID univoco (es: `did:zonia:indexer-frank`)
+2. Lo metti in `.env` come `INDEXER_DID`
+3. Chiami `register(did)` → salva on-chain `DID → wallet address`
+4. Il contratto poi verifica con `onlyIndexer(did)` che `_dids[did] == msg.sender`
+
+**Vantaggi rispetto al solo address:**
+- **Leggibile**: `did:zonia:frank` vs `0xf39fd6e51aad88f6...`
+- **Standard W3C**: compatibile con sistemi di identità decentralizzata
+- **Portabilità**: teoricamente trasferibile ad altro wallet
+
+**Verifica il tuo DID registrato:**
+```bash
+npm run did:lookup
+```
 
 ---
 
