@@ -163,7 +163,7 @@ async function approveStake() {
         gasLimit: config.blockchain.gasLimit,
     });
 
-    console.log(`⛓️  TX inviata: ${tx.hash}`);
+    console.log(`TX inviata: ${tx.hash}`);
     const receipt = await tx.wait();
 
     const updatedAllowance = await token.allowance(wallet.address, spender);

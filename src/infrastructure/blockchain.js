@@ -10,7 +10,7 @@ function normalizePrivateKey(privateKey) {
     const trimmedKey = privateKey.trim();
 
     if (/^0x00[0-9a-fA-F]{64}$/.test(trimmedKey)) {
-        console.warn("⚠️ PRIVATE_KEY contiene prefisso extra '00': normalizzato automaticamente.");
+        console.warn(":-# PRIVATE_KEY contiene prefisso extra '00': normalizzato automaticamente.");
         return `0x${trimmedKey.slice(4)}`;
     }
 
@@ -64,7 +64,7 @@ function formatBlockchainError(error) {
         const currentAllowance = allowanceMatch[2];
         const requiredAllowance = allowanceMatch[3];
 
-        return `Allowance token insufficiente per lo stake (spender: ${spender}, allowance attuale: ${currentAllowance}, richiesta: ${requiredAllowance}). Esegui approve() del token ZONIA verso IndexerRegistry prima di register().`;
+        return `:-() Allowance token insufficiente per lo stake (spender: ${spender}, allowance attuale: ${currentAllowance}, richiesta: ${requiredAllowance}). Esegui approve() del token ZONIA verso IndexerRegistry prima di register().`;
     }
 
     if (searchableMessage.includes("DID already registered")) {
@@ -294,7 +294,7 @@ class BlockchainService {
      */
     disconnect() {
         this.requestGate.removeAllListeners("RequestSubmitted");
-        console.log("🔌 Disconnesso da blockchain");
+        console.log(" Disconnesso da blockchain");
     }
 }
 
