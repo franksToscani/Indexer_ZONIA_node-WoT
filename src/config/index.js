@@ -14,13 +14,6 @@ const dotenv = require("dotenv");
  * - Separazione di secrets dal codice
  * 
  * File di configurazione: .env (root del progetto)
- * Formato:
- * PORT=3000
- * DATABASE_URL=postgresql://...
- * RPC_URL=http://localhost:8545
- * PRIVATE_KEY=0x...
- * INDEXER_DID=did:example:...
- * etc.
  */
 
 dotenv.config();

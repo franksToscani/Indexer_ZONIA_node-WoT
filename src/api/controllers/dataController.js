@@ -15,11 +15,17 @@
 async function getTdData(req, res, next) {
     try {
         const { requestId } = req.params;
-        
-        // Recupera i TD memorizzati da BlockchainService
+
+        // Recupera i TD memorizzati da BlockchainService (se stesso processo)
         // global.blockchain è settato in listener.js quando avvia il servizio
         // Il ? (optional chaining) è una protezione nel caso non sia inizializzato
-        const tds = global.blockchain?.getOfferedTds(requestId) || [];
+        let tds = global.blockchain?.getOfferedTds(requestId) || [];
+
+        // Fallback su DB (td_matches) per processi separati
+        if (tds.length === 0) {
+            const tdMatchesRepository = require("../../core/repositories/tdMatchesRepository");
+            tds = await tdMatchesRepository.findTdsByRequestId(requestId);
+        }
 
         if (tds.length === 0) {
             return res.status(404).json({
@@ -27,14 +33,26 @@ async function getTdData(req, res, next) {
             });
         }
 
+        const uniqueTdsMap = new Map();
+        for (const td of tds) {
+            const tdId = td?.id ? String(td.id) : null;
+            const key = tdId || JSON.stringify(td);
+
+            if (!uniqueTdsMap.has(key)) {
+                uniqueTdsMap.set(key, td);
+            }
+        }
+
+        const uniqueTds = Array.from(uniqueTdsMap.values());
+
         // Ritorna i TD trovati
         res.json({
             requestId,          
-            count: tds.length,   
-            data: tds,           
+            count: uniqueTds.length,
+            data: uniqueTds,
         });
     } catch (error) {
-        console.error(`❌ Errore nel controller getTdData:`, error.message);
+        console.error(`:-() Errore nel controller getTdData:`, error.message);
         next(error);
     }
 }

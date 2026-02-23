@@ -27,7 +27,7 @@ class TdMatchService {
             const candidateTdIds = await tdRepository.findTdIdsByType(requiredType);
             
             if (candidateTdIds.length === 0) {
-                console.log(`❌ Nessun TD compatibile per tipo: ${requiredType}`);
+                console.log(`Nessun TD compatibile per tipo: ${requiredType}`);
                 return [];
             }
 
@@ -35,10 +35,10 @@ class TdMatchService {
             // Abbiamo gli ID, ora otteniamo l'oggetto completo dal database
             const tds = await tdRepository.findTdsByIds(candidateTdIds);
             
-            console.log(`✅ Trovati ${tds.length} TD compatibili`);
+            console.log(`Trovati ${tds.length} TD compatibili`);
             return tds;
         } catch (error) {
-            console.error("❌ Errore ricerca TD:", error.message);
+            console.error(`:-() Errore ricerca TD:`, error.message);
             return [];
         }
     }

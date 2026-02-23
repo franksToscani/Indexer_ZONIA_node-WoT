@@ -10,7 +10,7 @@ const pool = require("../infrastructure/db");
 
 async function initDatabase() {
     try {
-        console.log("🔄 Inizializzazione database...");
+        console.log("Inizializzazione database...");
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS td_store (
@@ -29,11 +29,25 @@ async function initDatabase() {
             );
         `);
 
-        console.log("✅ Database pronto!\n");
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS td_matches (
+                id SERIAL PRIMARY KEY,
+                request_id TEXT NOT NULL,
+                td_id UUID NOT NULL,
+                matched_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        await pool.query(`
+            CREATE UNIQUE INDEX IF NOT EXISTS td_matches_request_td_uniq
+            ON td_matches (request_id, td_id);
+        `);
+
+        console.log(" Database pronto!\n");
         
         process.exit(0);
     } catch (error) {
-        console.error("❌ Errore:", error.message);
+        console.error(":-() Errore:", error.message);
         process.exit(1);
     }
 }

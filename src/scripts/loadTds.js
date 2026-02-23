@@ -9,7 +9,7 @@ const tdRepository = require("../core/repositories/tdRepository");
 
 async function loadTds() {
     try {
-        console.log("📂 Caricamento TD da file...");
+        console.log("Caricamento TD da file...");
         
         const filePath = config.files.tdList;
         
@@ -25,13 +25,13 @@ async function loadTds() {
         for (const td of tdArray) {
             await tdRepository.insertTd(td);
 
-            console.log(`   ✅ Caricato: ${td.title || td.id}`);
+            console.log(`Caricato: ${td.title || td.id}`);
             inserted++;
         }
 
                 process.exit(0);
     } catch (error) {
-        console.error("❌ Errore:", error.message);
+        console.error(":-() Errore:", error.message);
         process.exit(1);
     }
 }

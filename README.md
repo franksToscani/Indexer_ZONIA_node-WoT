@@ -81,7 +81,9 @@ src/
 │   ├── initDb.js                    # Crea schema database
 │   ├── loadTds.js                   # Carica TD da JSON
 │   ├── listener.js                  # MAIN: Blockchain listener
-│   └── getRegisteredDid.js          # Verifica DID registrato on-chain
+│   ├── getRegisteredDid.js          # Verifica DID registrato on-chain
+│   ├── approveStake.js              # Approve token ZONIA per stake
+│   └── demoStart.js                 # One-shot: approve + listener
 └── contracts/
     ├── IndexerRegistry.sol          # Contract source
     ├── Gate.sol                     # Contract source
@@ -138,7 +140,7 @@ npm run td:load
 
 ```bash
 # Terminal 1: Blockchain listener (principale)
-npm run listener
+npm run demo:start
 # oppure: node src/scripts/listener.js
 
 # Terminal 2: API server (serve i TD agli oracoli)
@@ -146,7 +148,13 @@ npm start
 # oppure: node src/server.js
 ```
 
-**Option B: Backgroundare il listener**
+**Option B: Demo One-Shot (approve automatico + listener)**
+```bash
+# Esegue automaticamente approve stake e avvia listener
+npm run demo:start
+```
+
+**Option C: Backgroundare il listener**
 ```bash
 # Avvia il listener in background
 node src/scripts/listener.js &
@@ -346,6 +354,8 @@ function applyToRequest(
 | `INDEXER_DID` | DID univoco dell'indexer | `did:zonia:indexer-frank` |
 | `INDEXER_REGISTRY_ADDRESS` | Indirizzo smart contract registry | `0x5FbDB...` |
 | `REQUEST_GATE_ADDRESS` | Indirizzo smart contract gate | `0xe7f1...` |
+| `ZONIA_TOKEN_ADDRESS` | Indirizzo token ERC20 ZONIA | `0x5FbDB...` |
+| `STAKE_AMOUNT` | Stake richiesto in token interi | `1000` |
 | `PORT` | Porta HTTP (default: 3000) | `3000` |
 | `TD_LIST_FILE` | Path file TD JSON | `tds/td_list.json` |
 | `GAS_LIMIT` | Limite gas transazioni | `500000` |
@@ -386,6 +396,8 @@ curl http://localhost:3000/data/0x...
 | `npm run db:init` | Inizializza database |
 | `npm run td:load` | Carica Thing Descriptions |
 | `npm run did:lookup` | Verifica DID registrato on-chain |
+| `npm run stake:approve` | Approve token ZONIA per stake |
+| `npm run demo:start` | One-shot: approve + listener |
 
 ---
 
@@ -435,6 +447,33 @@ npm install --save pg ethers express dotenv
 2. Non usare placeholder `0x...`
 3. Chiedi al tutore gli indirizzi deployati corretti
 
+### ❌ "DID already registered" (riavvio listener)
+**Soluzione:**
+Non è un errore! Il listener riconosce automaticamente questo caso e continua in ascolto.
+Se vedi `⚠️ DID già registrato on-chain (riavvio listener)`, tutto è ok.
+
+### ❌ "PRIVATE_KEY non valida: deve essere una chiave esadecimale da 32 byte"
+**Soluzione:**
+1. Formato corretto: `0x` + esattamente 64 caratteri hex
+2. Esempio: `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
+3. Non usare prefissi extra tipo `0x00...`
+4. Rimuovi virgolette e spazi
+
+### ❌ "ZONIA_TOKEN_ADDRESS non valido per questa rete"
+**Soluzione:**
+1. Verifica che `RPC_URL` punti alla stessa rete dove sono deployati i contratti
+2. Aggiorna `ZONIA_TOKEN_ADDRESS` con l'indirizzo reale dalla rete corretta
+3. Esegui deploy contratti su localhost se stai testando: vedi sezione "Demo Completa"
+
+### ❌ "Allowance token insufficiente per lo stake"
+**Soluzione:**
+Esegui l'approve prima di register:
+```bash
+npm run stake:approve
+# oppure usa demo:start che fa tutto automaticamente
+npm run demo:start
+```
+
 ### ❌ "RequestGate event not firing"
 **Soluzione:**
 1. Verifica RPC_URL sia corretto
@@ -462,7 +501,102 @@ npm install --save pg ethers express dotenv
 
 ---
 
-## 🆔 Cos'è il DID (Decentralized Identifier)?
+## � Demo Completa End-to-End
+
+Per testare l'intero sistema in locale:
+
+### Setup ambiente completo
+
+**1. Avvia nodo Hardhat (Terminal 1):**
+```bash
+cd C:\Users\ftosc\Downloads\protocol\protocol
+npx hardhat node
+# Lascia running, mostra 20 account con ETH
+```
+
+**2. Deploy contratti ZONIA (Terminal 2):**
+```bash
+cd C:\Users\ftosc\Downloads\protocol\protocol
+npx hardhat --network localhost deploy localhost
+# Output: indirizzi deployati (ZoniaToken, Gate, IndexerRegistry...)
+# Copia gli indirizzi nel tuo .env dell'indexer
+```
+
+**3. Configura indexer .env (usa indirizzi deployati):**
+```dotenv
+RPC_URL=http://localhost:8545
+PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+INDEXER_DID=did:zonia:indexer-demo
+INDEXER_REGISTRY_ADDRESS=0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+REQUEST_GATE_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+ZONIA_TOKEN_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+STAKE_AMOUNT=1000
+DATABASE_URL=postgresql://postgres:password@localhost:5432/indexerDB
+```
+
+**4. Setup database e TD (Terminal 3 - indexer):**
+```bash
+cd C:\Users\ftosc\Dev\Indexer_ZONIA_node-WoT
+npm run db:init
+npm run td:load
+```
+
+**5. Avvia listener indexer:**
+```bash
+npm run demo:start
+# Output:
+# ✅ Approve confermata
+# ✅ Registrato on-chain
+# ✅ Listener avviato e in ascolto...
+```
+
+**6. Simula richiesta dal protocol (Terminal 2):**
+```bash
+cd C:\Users\ftosc\Downloads\protocol\protocol
+npx hardhat run scripts/simulateRequest.js --network localhost
+# Output:
+# ✅ Richiesta inviata
+# 🆔 Request ID: 0x...
+```
+
+**7. Verifica cattura nel listener (Terminal 3):**
+```
+📢 Nuova richiesta ricevuta!
+   RequestID: 0xea85...
+   Query richiesta: TemperatureSensor
+🎯 Trovati 2 TD compatibili
+🤝 Iscriviti a richiesta...
+✅ Iscritto con successo
+💾 Salvati 2 TD per richiesta
+```
+
+**8. (Opzionale) Avvia API server (Terminal 4):**
+```bash
+cd C:\Users\ftosc\Dev\Indexer_ZONIA_node-WoT
+npm start
+# Ora oracle può chiamare: GET /data/0xea85...
+```
+
+### Script di simulazione (nel progetto protocol)
+
+Il file `scripts/simulateRequest.js` nel progetto protocol:
+- Approva automaticamente i token ZONIA al Gate
+- Chiama `submitRequest({ query: "TemperatureSensor", ... })`
+- Emette evento `RequestSubmitted` che il listener cattura
+
+Personalizza la query modificando:
+```javascript
+const inputRequest = {
+    query: "TemperatureSensor",  // Cambia tipo TD richiesto
+    ko: 0,   // Numero oracoli
+    ki: 1,   // Numero indexer
+    fee: feeAmount
+};
+```
+
+---
+
+## �🆔 Cos'è il DID (Decentralized Identifier)?
 
 Il **DID** è un identificatore univoco che rappresenta il tuo indexer nel sistema ZONIA.
 
@@ -493,6 +627,140 @@ did:example:0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
 ```bash
 npm run did:lookup
 ```
+
+---
+
+## 🧪 Testing con il Relatore
+
+Se il relatore vuole testare il tuo indexer sulla loro blockchain, fornisci loro questo endpoint:
+
+### Endpoint da fornire
+
+```
+http://<your-host>:<port>/data/:requestId
+```
+
+**Dove:**
+- `<your-host>` = IP/hostname della tua macchina (es: `localhost`, `192.168.1.100`, `example.com`)
+- `<port>` = porta API (default: `3000`)
+- `:requestId` = ID della richiesta che loro creano sulla loro blockchain
+
+**Esempi:**
+```
+http://localhost:3000/data/:requestId          # Test locale
+http://192.168.1.100:3000/data/:requestId      # Rete locale
+http://myindexer.example.com:3000/data/:requestId  # Remoto
+```
+
+### Come preparare il server per i test
+
+**1. Aggiorna la configurazione:**
+Modifica `.env` con i parametri della loro blockchain:
+```dotenv
+RPC_URL=<loro endpoint RPC>
+PRIVATE_KEY=<tua chiave privata>
+INDEXER_DID=did:zonia:indexer-<nome>
+INDEXER_REGISTRY_ADDRESS=<loro IndexerRegistry>
+REQUEST_GATE_ADDRESS=<loro RequestGate>
+ZONIA_TOKEN_ADDRESS=<loro token ZONIA>
+STAKE_AMOUNT=1000
+PORT=3000
+```
+
+**2. Setup database:**
+```bash
+npm run db:init
+npm run td:load
+```
+
+**3. Approva lo stake:**
+```bash
+npm run stake:approve
+```
+
+**4. Avvia il listener e l'API:**
+```bash
+# Terminal 1: Listener (ascolta blockchain)
+npm run listener
+
+# Terminal 2: API server
+npm start
+```
+
+O in un'unica sessione:
+```bash
+npm run demo:start
+# Poi in un altro terminal:
+npm start
+```
+
+### Cosa il relatore deve fare
+
+**1. Creare una richiesta sulla loro blockchain:**
+```solidity
+// Pseudocode
+requestGate.submitRequest({
+    query: "Sensor",  // Tipo di Thing Description ricercato
+    ko: 0,            // Numero oracoli necessari
+    ki: 1,            // Numero indexer necessari
+    fee: amount       // Fee in token
+})
+// Emits RequestSubmitted(requestId, sender)
+```
+
+**2. Recuperare il `requestId` dall'evento**
+```javascript
+const requestId = event.requestId;  // es: 0x1234abcd...
+```
+
+**3. Attendere che il tuo indexer si iscriva**
+- Il tuo listener cattura l'evento `RequestSubmitted`
+- Cerca TD compatibili nel DB
+- Chiama `applyToRequest(did, requestId)`
+- Salva i TD matchati
+
+**4. Chiamare l'endpoint per ottenere i TD:**
+```bash
+curl http://<your-host>:3000/data/<requestId>
+```
+
+### Risposta attesa
+
+Se il tuo indexer ha TD compatibili:
+```json
+[
+  {
+    "id": "td-sensor-001",
+    "title": "Temperature Sensor",
+    "@type": "Sensor",
+    "description": "Misura temperatura ambiente",
+    "properties": { ... }
+  },
+  {
+    "id": "td-sensor-002",
+    "title": "Humidity Sensor",
+    "@type": "Sensor",
+    ...
+  }
+]
+```
+
+Se NON hai TD compatibili:
+```json
+{
+  "error": "Nessun TD disponibile per questa richiesta"
+}
+```
+
+### Troubleshooting
+
+| Problema | Causa | Soluzione |
+|----------|-------|-----------|
+| `Connection refused` | Server non in ascolto | Esegui `npm start` |
+| `404 - No TD found` | Indexer non iscritto | Verifica RPC_URL e che listener sia attivo |
+| `timeout` | Listener non cattura evento | Verifica REQUEST_GATE_ADDRESS |
+| `Can't parse requestId` | Formato ID non valido | Assicurati sia un hex valido (0x...) |
+| `Duplicate TD on retry` | Deduplicazione fallita | Normale, il sistema deduplica automaticamente |
 
 ---
 

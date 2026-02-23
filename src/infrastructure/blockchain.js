@@ -2,12 +2,77 @@ const { ethers } = require("ethers");
 const fs = require("fs");
 const path = require("path");
 
+function normalizePrivateKey(privateKey) {
+    if (!privateKey) {
+        throw new Error("PRIVATE_KEY mancante nel file .env");
+    }
+
+    const trimmedKey = privateKey.trim();
+
+    if (/^0x00[0-9a-fA-F]{64}$/.test(trimmedKey)) {
+        console.warn("⚠️ PRIVATE_KEY contiene prefisso extra '00': normalizzato automaticamente.");
+        return `0x${trimmedKey.slice(4)}`;
+    }
+
+    if (!/^0x[0-9a-fA-F]{64}$/.test(trimmedKey)) {
+        throw new Error("PRIVATE_KEY non valida: deve essere una chiave esadecimale da 32 byte (formato 0x + 64 caratteri hex).");
+    }
+
+    return trimmedKey;
+}
+
 function formatBlockchainError(error) {
-    return (
+    const rawMessage = [
+        error?.info?.error?.message,
+        error?.reason,
+        error?.message,
+        error?.shortMessage,
+    ]
+        .find((value) => value && value !== "could not coalesce error") ||
         error?.shortMessage ||
-        error?.reason ||
-        error?.info?.error?.message ||
-        error?.message ||
+        "";
+
+    const searchableMessage = [
+        error?.info?.error?.message,
+        error?.reason,
+        error?.message,
+        error?.shortMessage,
+        (() => {
+            try {
+                return JSON.stringify(error);
+            } catch {
+                return "";
+            }
+        })(),
+        (() => {
+            try {
+                return JSON.stringify(error?.info?.payload);
+            } catch {
+                return "";
+            }
+        })(),
+    ]
+        .filter(Boolean)
+        .join(" | ");
+
+    const allowanceMatch = searchableMessage.match(
+        /ERC20InsufficientAllowance\((?:\\?"|')?([^,"')]+)(?:\\?"|')?,\s*(\d+),\s*(\d+)\)/
+    );
+
+    if (allowanceMatch) {
+        const spender = allowanceMatch[1];
+        const currentAllowance = allowanceMatch[2];
+        const requiredAllowance = allowanceMatch[3];
+
+        return `Allowance token insufficiente per lo stake (spender: ${spender}, allowance attuale: ${currentAllowance}, richiesta: ${requiredAllowance}). Esegui approve() del token ZONIA verso IndexerRegistry prima di register().`;
+    }
+
+    if (searchableMessage.includes("DID already registered")) {
+        return "DID_ALREADY_REGISTERED";
+    }
+
+    return (
+        rawMessage ||
         "Errore blockchain sconosciuto"
     );
 }
@@ -50,7 +115,8 @@ class BlockchainService {
         
         // ======== Wallet: firma le transazioni ========
         // Combina private key + provider per creare account che può firmare
-        this.wallet = new ethers.Wallet(config.privateKey, this.provider);
+        const normalizedPrivateKey = normalizePrivateKey(config.privateKey);
+        this.wallet = new ethers.Wallet(normalizedPrivateKey, this.provider);
         
         // ======== Caricamento ABI (Application Binary Interface) ========
         // L'ABI è la definizione JSON delle funzioni del smart contract
@@ -95,7 +161,7 @@ class BlockchainService {
     async registerIndexer() {
         try {
             console.log(
-                `🔗 Registrazione indexer con DID: ${this.config.indexerDid}`
+                `... Registrazione indexer con DID: ${this.config.indexerDid}`
             );
             
             // Chiama register(did) sul contratto IndexerRegistry
@@ -109,11 +175,18 @@ class BlockchainService {
             // di default, attende 1 blocco di confirmazione
             const receipt = await tx.wait();
             
-            console.log(`✅ Registrato on-chain - TX: ${receipt.hash}`);
+            console.log(` Registrato on-chain - TX: ${receipt.hash}`);
             return receipt.hash;
         } catch (error) {
-            console.error("❌ Errore registrazione:", formatBlockchainError(error));
-            throw error;
+            const formattedError = formatBlockchainError(error);
+            
+            if (formattedError === "DID_ALREADY_REGISTERED") {
+                console.log(` DID già registrato on-chain (riavvio listener)`);
+                return null;
+            }
+            
+            console.error(`:-() Errore registrazione:`, formattedError);
+            throw new Error(formattedError);
         }
     }
 
@@ -126,10 +199,10 @@ class BlockchainService {
      * Rimane attivo fino a quando il programma non termina.
      */
     listenToRequests(onRequestHandler) {
-        console.log("👂 In ascolto di RequestSubmitted...");
+        console.log(" In ascolto di RequestSubmitted...");
 
         this.requestGate.on("RequestSubmitted", async (requestId, sender) => {
-            console.log(`\n📢 Nuova richiesta ricevuta!`);
+            console.log(`\n-() Nuova richiesta ricevuta!`);
             console.log(`   RequestID: ${requestId}`);
             console.log(`   Sender: ${sender}`);
 
@@ -139,7 +212,7 @@ class BlockchainService {
                 requiredType = request.query;
                 console.log(`   Query richiesta: ${requiredType}`);
             } catch (error) {
-                console.error("❌ Impossibile leggere la richiesta on-chain:", formatBlockchainError(error));
+                console.error(`:-() Impossibile leggere la richiesta on-chain:`, formatBlockchainError(error));
                 return;
             }
 
@@ -157,7 +230,7 @@ class BlockchainService {
      */
     async applyToRequest(requestId) {
         try {
-            console.log(`🤝 Iscriviti a richiesta ${requestId}...`);
+            console.log(`Iscriviti a richiesta ${requestId}...`);
             
             // Chiama applyToRequest(indexerDid, requestId) sul contratto
             const tx = await this.requestGate.applyToRequest(
@@ -169,16 +242,20 @@ class BlockchainService {
             // Attende la confirmazione
             const receipt = await tx.wait();
             
-            console.log(`✅ Iscritto con successo - TX: ${receipt.hash}`);
+            console.log(`Iscritto con successo - TX: ${receipt.hash}`);
             return receipt.hash;
         } catch (error) {
-            console.error("❌ Errore iscrizione:", formatBlockchainError(error));
-            throw error;
+            const formattedError = formatBlockchainError(error);
+            console.error(`:-() Errore iscrizione:`, formattedError);
+            throw new Error(formattedError);
         }
     }
 
     /**
-     * Memorizza i TD offerti per una richiesta specifica
+     * Memorizza i TD offerti per una richiesta specifica 
+     * per adesso lo faccio in una mappa in memoria, ma poi useroi un database vero (es. Redis) per persistenza e scalabilità.
+     * 
+     * Questa funzione è chiamata dal dataController quando l'oracle chiama GET /data/:requestId
      */
     storeOfferedTds(requestId, tds) {
         if (!this.didToTds.has(this.config.indexerDid)) {
@@ -190,7 +267,7 @@ class BlockchainService {
             .push({ requestId, tds });
         
         console.log(
-            `💾 Salvati ${tds.length} TD per richiesta ${requestId}`
+            `Salvati ${tds.length} TD per richiesta ${requestId}`
         );
     }
 

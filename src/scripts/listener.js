@@ -1,6 +1,7 @@
 const config = require("../config");
 const BlockchainService = require("../infrastructure/blockchain");
 const tdMatchService = require("../core/services/tdMatchService");
+const tdMatchesRepository = require("../core/repositories/tdMatchesRepository");
 const pool = require("../infrastructure/db");
 
 /**
@@ -15,11 +16,8 @@ const pool = require("../infrastructure/db");
  * 3. Ascoltare eventi RequestSubmitted dal contratto RequestGate
  * 4. Valutare la compatibilità dei TD per ogni richiesta
  * 5. Iscrivere l'indexer se c'è match trovato
- * 6. Memorizzare TD offerti in memoria per il successivo retrieval via API
+ * 6. Memorizzare TD offerti in memoria/nel db per il successivo retrieval via API
  * 7. Gestire lo spegnimento graceful (Ctrl+C)
- * 
- * Utilizzo (da terminale):
- * $ node src/scripts/listener.js
  * 
  * Prerequisiti:
  * - Database PostgreSQL con TD caricate (eseguire loadTds.js prima)
@@ -31,7 +29,7 @@ const pool = require("../infrastructure/db");
 
 async function startListener() {
     try {
-        console.log("🔗 Inizializzazione Blockchain Service...");
+        console.log("Inizializzazione Blockchain Service...");
         const blockchain = new BlockchainService(config.blockchain);
 
         // Rendi il BlockchainService disponibile globalmente
@@ -40,7 +38,7 @@ async function startListener() {
         global.blockchain = blockchain;
 
         // STEP 2: Registrazione on-chain
-        console.log("\n📝 Registrazione on-chain...");
+        console.log("\n Registrazione on-chain...");
         await blockchain.registerIndexer();
 
         // STEP 3: handler per le richieste
@@ -53,28 +51,44 @@ async function startListener() {
                 // Questo registra la nostra offerta on-chain
                 await blockchain.applyToRequest(requestId);
                 
+                // Layer 1: Memory cache (same process performance)
                 // Memorizza i TD in una Map all'interno di BlockchainService
                 // Quando l'oracle chiama GET /data/:requestId,
                 // dataController recupererà questi TD da qui
                 blockchain.storeOfferedTds(requestId, tds);
+
+                // Layer 2: Database persistence (cross-process sharing, fallback)
+                // Persiste su DB per accesso da processi separati
+                try {
+                    const savedCount = await tdMatchesRepository.insertMatches(
+                        requestId,
+                        tds
+                    );
+                    console.log(`Persistiti ${savedCount} TD in td_matches`);
+                } catch (error) {
+                    console.error(
+                        `:-() Errore salvataggio td_matches:`,
+                        error.message
+                    );
+                }
             }
         };
 
         // STEP 4: Registra il listener e rimani in ascolto
         blockchain.listenToRequests(onRequestHandler);
-        console.log("\n✅ Listener avviato e in ascolto...\n");
+        console.log("\n Listener avviato e in ascolto...\n");
 
         // STEP 5: Gestione dello spegnimento graceful
         // Quando l'utente preme Ctrl+C:
         process.on("SIGINT", () => {
-            console.log("\n\n⛔ Spegnimento...");
+            console.log("\n\n Spegnimento...");
             blockchain.disconnect();
             pool.end();
             process.exit(0);
         });
     } catch (error) {
         // Se qualcosa fallisce durante l'inizializzazione (registrazione, connessione, ecc),
-        console.error("❌ Errore fatale:", error.message);
+        console.error(":-() Errore fatale:", error.message);
         process.exit(1);
     }
 }

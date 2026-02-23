@@ -29,12 +29,12 @@ async function getRegisteredDid() {
 
     const events = await registry.queryFilter(filter, 0, "latest");
 
-    console.log("🔎 Lookup DID registrato");
+    console.log(" Lookup DID registrato");
     console.log(`   Wallet: ${walletAddress}`);
     console.log(`   Registry: ${indexerRegistryAddress}`);
 
     if (events.length === 0) {
-        console.log("\n⚠️ Nessun evento IndexerRegistered trovato per questo wallet.");
+        console.log("\n Nessun evento IndexerRegistered trovato per questo wallet.");
         console.log("   Significa che probabilmente non sei ancora registrato on-chain.");
         return null;
     }
@@ -42,7 +42,7 @@ async function getRegisteredDid() {
     const last = events[events.length - 1];
     const did = last.args.did;
 
-    console.log("\n✅ DID trovato:");
+    console.log("\n DID trovato:");
     console.log(`   DID: ${did}`);
     console.log(`   Block: ${last.blockNumber}`);
     console.log(`   Tx: ${last.transactionHash}`);
@@ -60,7 +60,7 @@ if (require.main === module) {
                 error?.info?.error?.message ||
                 error?.message ||
                 "Errore sconosciuto";
-            console.error("❌ Errore lookup DID:", reason);
+            console.error(":-() Errore lookup DID:", reason);
             process.exit(1);
         });
 }

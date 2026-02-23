@@ -49,10 +49,10 @@ async function insertTd(td, client = pool) {
         );
         
         const insertedId = rows[0].id;
-        console.log(`✅ TD inserita con ID: ${insertedId}`);
+        console.log(` TD inserita con ID: ${insertedId}`);
         return insertedId;
     } catch (error) {
-        console.error(`❌ Errore inserimento TD:`, error.message);
+        console.error(`:-() Errore inserimento TD:`, error.message);
         throw error;
     }
 }
@@ -75,10 +75,10 @@ async function findTdIdsByType(type, client = pool) {
         );
         
         const ids = rows.map((row) => row.id);
-        console.log(`✅ Trovati ${ids.length} TD di tipo "${type}"`);
-        return ids;
+        console.log(` Trovati ${ids.length} TD di tipo "${type}"`);
+        return ids
     } catch (error) {
-        console.error(`❌ Errore ricerca TD per tipo "${type}":`, error.message);
+        console.error(`:-() Errore ricerca TD per tipo "${type}":`, error.message);
         throw error;
     }
 }
@@ -91,7 +91,7 @@ async function findTdsByIds(ids, client = pool) {
     try {
         // Protezione: se non ci sono ID, non eseguire la query
         if (!ids || ids.length === 0) {
-            console.log("ℹ️ Nessun ID fornito per la ricerca");
+            console.log(" Nessun ID fornito per la ricerca");
             return [];
         }
 
@@ -106,10 +106,10 @@ async function findTdsByIds(ids, client = pool) {
             [normalizedIds]
         );
 
-        console.log(`✅ Recuperate ${rows.length} TD dai ${ids.length} ID requestati`);
+        console.log(` Recuperate ${rows.length} TD dai ${ids.length} ID requestati`);
         return rows;
     } catch (error) {
-        console.error(`❌ Errore recupero TD per IDs:`, error.message);
+        console.error(`:-() Errore recupero TD per IDs:`, error.message);
         throw error;
     }
 }
