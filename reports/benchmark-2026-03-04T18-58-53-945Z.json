@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-03-04T18:58:53.945Z",
+  "settings": {
+    "protocolPath": "C:/Users/ftosc/Downloads/protocol/protocol",
+    "apiBaseUrl": "http://localhost:3000",
+    "sampleSize": 20,
+    "phaseSeconds": 60,
+    "onlyPhase": "10_rpm",
+    "resetBetweenPhases": true
+  },
+  "phases": [
+    {
+      "phase": "10_rpm",
+      "command": "npx hardhat run scripts/simulateRequest.js --network localhost",
+      "commandSucceeded": true,
+      "commandError": "",
+      "targetRpm": 10,
+      "attempts": 8,
+      "successfulSubmissions": 8,
+      "failedSubmissions": 0,
+      "startedAt": "2026-03-04T18:57:52.836Z",
+      "endedAt": "2026-03-04T18:58:53.114Z",
+      "durationSeconds": 60.28,
+      "requestCount": 7,
+      "tdMatchCount": 10000,
+      "requestsPerMinuteObserved": 6.97,
+      "e2eThroughputRpm": 6.97,
+      "api": {
+        "sampledRequests": 7,
+        "successCount": 7,
+        "errorCount": 0,
+        "cacheHitCount": 0,
+        "dbFallbackCount": 7,
+        "cacheHitRate": 0,
+        "overall": {
+          "avgMs": 96.29,
+          "minMs": 35,
+          "maxMs": 229
+        },
+        "cache": {
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 0
+        },
+        "dbFallback": {
+          "avgMs": 96.29,
+          "minMs": 35,
+          "maxMs": 229
+        }
+      },
+      "e2e": {
+        "completedRequests": 7,
+        "submittedRequests": 8,
+        "avgMs": 9856.43,
+        "minMs": 8140,
+        "maxMs": 11322
+      },
+      "matches": {
+        "avg": 1428.57,
+        "min": 1000,
+        "max": 4000,
+        "matchRate": 87.5,
+        "matchedRequests": 7,
+        "denominator": 8
+      },
+      "queryDistribution": {
+        "Camera": 3,
+        "Meter": 2,
+        "Thermostat": 1,
+        "Sensor": 1,
+        "Gateway": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "generatedAt": "2026-03-04T19:00:48.420Z",
+  "settings": {
+    "apiBaseUrl": "http://localhost:3000",
+    "requestId": "0xae2926aa1e0b35301e104a6bc50d7276690a985d4b6d7f56bf503c61b1fa83cd",
+    "oracles": 10,
+    "rounds": 1,
+    "roundDelayMs": 0,
+    "timeoutMs": 15000
+  },
+  "durationSeconds": 0.73,
+  "throughputPerMin": 821.92,
+  "summary": {
+    "totalCalls": 10,
+    "successCount": 10,
+    "errorCount": 0,
+    "errorRate": 0,
+    "cacheHits": 0,
+    "dbFallbackCount": 10,
+    "cacheHitRate": 0,
+    "apiOverall": {
+      "count": 10,
+      "avgMs": 395.5,
+      "minMs": 165,
+      "maxMs": 704
+    },
+    "apiCache": {
+      "count": 0,
+      "avgMs": 0,
+      "minMs": 0,
+      "maxMs": 0
+    },
+    "apiDbFallback": {
+      "count": 10,
+      "avgMs": 395.5,
+      "minMs": 165,
+      "maxMs": 704
+    }
+  },
+  "rows": [
+    {
+      "round": 1,
+      "oracleId": 1,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 418,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 2,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 165,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 3,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 704,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 4,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 222,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 5,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 299,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 6,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 254,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 7,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 484,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 8,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 425,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 9,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 522,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 10,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 462,
+      "source": "db",
+      "error": ""
+    }
+  ]
+}

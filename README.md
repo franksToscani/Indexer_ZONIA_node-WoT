@@ -395,9 +395,79 @@ curl http://localhost:3000/data/0x...
 | `npm run listener` | Avvia blockchain listener |
 | `npm run db:init` | Inizializza database |
 | `npm run td:load` | Carica Thing Descriptions |
+| `npm run td:seed-large` | Genera e inserisce dataset TD massivo (default: 10k) |
 | `npm run did:lookup` | Verifica DID registrato on-chain |
 | `npm run stake:approve` | Approve token ZONIA per stake |
 | `npm run demo:start` | One-shot: approve + listener |
+| `npm run benchmark:indexer` | Esegue benchmark 1/10/30 req/min e salva report JSON/CSV |
+
+---
+
+## 📈 Benchmark per Tesi
+
+Questa sezione permette di produrre risultati analitici ripetibili su dataset grande e carico crescente.
+
+### 1) Seed database con 10k TD
+
+```bash
+# Default: 10k TD, truncate td_store + td_matches
+npm run td:seed-large
+
+# Personalizzato: 20k TD, batch da 1000
+npm run td:seed-large -- --count 20000 --batch-size 1000
+```
+
+### 2) Avvio ambiente test
+
+Apri terminali separati:
+
+```bash
+# Terminale A (protocol)
+npx hardhat node
+
+# Terminale B (indexer)
+npm run listener
+
+# Terminale C (indexer API)
+npm start
+```
+
+### 3) Esecuzione benchmark 1 / 10 / 30 req/min
+
+Prerequisito: nel progetto `protocol` devono esistere gli script:
+- `scripts/simulateRequest1.js`
+- `scripts/simulateRequest10.js`
+- `scripts/simulateRequest30.js`
+
+Esecuzione dal progetto indexer:
+
+```bash
+npm run benchmark:indexer -- --protocol-path C:/Users/ftosc/Downloads/protocol/protocol
+```
+
+Opzioni utili:
+
+```bash
+# Campiona 50 requestId per la latenza API e resetta td_matches tra fasi
+npm run benchmark:indexer -- --protocol-path C:/Users/ftosc/Downloads/protocol/protocol --sample-size 50 --reset-between-phases
+
+# Override comandi fase (se usi nomi script diversi)
+npm run benchmark:indexer -- --protocol-path C:/Users/ftosc/Downloads/protocol/protocol --command-1 "node scripts/simulateRequest.js" --command-10 "node scripts/simulateRequest10.js" --command-30 "node scripts/simulateRequest30.js"
+```
+
+### 4) Output analitico
+
+Il benchmark salva due file in `reports/`:
+- `benchmark-<timestamp>.json`
+- `benchmark-<timestamp>.csv`
+
+Metriche incluse per ogni fase:
+- durata test
+- numero richieste processate (`requestCount`)
+- numero TD matchate (`tdMatchCount`)
+- throughput osservato (`requestsPerMinuteObserved`)
+- latenza API su campione (`avgMs`, `p95Ms`)
+- success/failure command execution
 
 ---
 

@@ -15,6 +15,7 @@
 async function getTdData(req, res, next) {
     try {
         const { requestId } = req.params;
+        let source = "cache";
 
         // Recupera i TD memorizzati da BlockchainService (se stesso processo)
         // global.blockchain è settato in listener.js quando avvia il servizio
@@ -25,6 +26,7 @@ async function getTdData(req, res, next) {
         if (tds.length === 0) {
             const tdMatchesRepository = require("../../core/repositories/tdMatchesRepository");
             tds = await tdMatchesRepository.findTdsByRequestId(requestId);
+            source = "db";
         }
 
         if (tds.length === 0) {
@@ -46,9 +48,11 @@ async function getTdData(req, res, next) {
         const uniqueTds = Array.from(uniqueTdsMap.values());
 
         // Ritorna i TD trovati
+        res.set("x-data-source", source);
         res.json({
             requestId,          
             count: uniqueTds.length,
+            source,
             data: uniqueTds,
         });
     } catch (error) {

@@ -1,0 +1,312 @@
+{
+  "generatedAt": "2026-03-04T19:49:59.707Z",
+  "settings": {
+    "apiBaseUrl": "http://localhost:3000",
+    "requestId": "0x76faf097ed1cc09e21dc4812d7bf060136f909a507131d0c3f8321f268cb6bf4",
+    "oracles": 10,
+    "rounds": 3,
+    "roundDelayMs": 0,
+    "timeoutMs": 15000
+  },
+  "durationSeconds": 0.87,
+  "throughputPerMin": 2068.97,
+  "summary": {
+    "totalCalls": 30,
+    "successCount": 30,
+    "errorCount": 0,
+    "errorRate": 0,
+    "cacheHits": 0,
+    "dbFallbackCount": 30,
+    "cacheHitRate": 0,
+    "apiOverall": {
+      "count": 30,
+      "avgMs": 187.63,
+      "minMs": 33,
+      "maxMs": 485
+    },
+    "apiCache": {
+      "count": 0,
+      "avgMs": 0,
+      "minMs": 0,
+      "maxMs": 0
+    },
+    "apiDbFallback": {
+      "count": 30,
+      "avgMs": 187.63,
+      "minMs": 33,
+      "maxMs": 485
+    }
+  },
+  "rows": [
+    {
+      "round": 1,
+      "oracleId": 1,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 364,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 2,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 287,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 3,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 338,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 4,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 436,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 5,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 392,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 6,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 358,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 7,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 345,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 8,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 371,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 9,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 485,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 10,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 417,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 1,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 41,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 2,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 134,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 3,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 49,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 4,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 61,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 5,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 72,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 6,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 85,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 7,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 92,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 8,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 124,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 9,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 106,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 10,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 148,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 1,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 33,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 2,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 42,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 3,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 51,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 4,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 62,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 5,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 78,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 6,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 92,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 7,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 128,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 8,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 138,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 9,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 119,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "oracleId": 10,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 181,
+      "source": "db",
+      "error": ""
+    }
+  ]
+}

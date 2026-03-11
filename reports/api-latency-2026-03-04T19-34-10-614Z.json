@@ -1,0 +1,222 @@
+{
+  "generatedAt": "2026-03-04T19:34:10.612Z",
+  "settings": {
+    "apiBaseUrl": "http://localhost:3000",
+    "requestId": "0x7882e5a9809feaa0f71e2a6938bed1d9986a42195b0084a84be70a84d2c6c8c5",
+    "oracles": 10,
+    "rounds": 2,
+    "roundDelayMs": 0,
+    "timeoutMs": 15000
+  },
+  "durationSeconds": 0.79,
+  "throughputPerMin": 1518.99,
+  "summary": {
+    "totalCalls": 20,
+    "successCount": 20,
+    "errorCount": 0,
+    "errorRate": 0,
+    "cacheHits": 0,
+    "dbFallbackCount": 20,
+    "cacheHitRate": 0,
+    "apiOverall": {
+      "count": 20,
+      "avgMs": 299.55,
+      "minMs": 33,
+      "maxMs": 593
+    },
+    "apiCache": {
+      "count": 0,
+      "avgMs": 0,
+      "minMs": 0,
+      "maxMs": 0
+    },
+    "apiDbFallback": {
+      "count": 20,
+      "avgMs": 299.55,
+      "minMs": 33,
+      "maxMs": 593
+    }
+  },
+  "rows": [
+    {
+      "round": 1,
+      "oracleId": 1,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 532,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 2,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 558,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 3,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 411,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 4,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 593,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 5,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 419,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 6,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 466,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 7,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 565,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 8,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 509,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 9,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 576,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 1,
+      "oracleId": 10,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 475,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 1,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 45,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 2,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 33,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 3,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 66,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 4,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 54,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 5,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 79,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 6,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 91,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 7,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 106,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 8,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 120,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 9,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 142,
+      "source": "db",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "oracleId": 10,
+      "ok": true,
+      "status": 200,
+      "latencyMs": 151,
+      "source": "db",
+      "error": ""
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "generatedAt": "2026-03-04T19:00:47.297Z",
+  "settings": {
+    "apiBaseUrl": "http://localhost:3000",
+    "requestId": "0x2c9ec8382c5ebd1ab3bd8a9605b074c236fc0588896493578cb5f551eb060fdc",
+    "oracles": 10,
+    "rounds": 1,
+    "roundDelayMs": 0,
+    "timeoutMs": 15000
+  },
+  "durationSeconds": 0.08,
+  "throughputPerMin": 0,
+  "summary": {
+    "totalCalls": 10,
+    "successCount": 0,
+    "errorCount": 10,
+    "errorRate": 100,
+    "cacheHits": 0,
+    "dbFallbackCount": 0,
+    "cacheHitRate": 0,
+    "apiOverall": {
+      "count": 0,
+      "avgMs": 0,
+      "minMs": 0,
+      "maxMs": 0
+    },
+    "apiCache": {
+      "count": 0,
+      "avgMs": 0,
+      "minMs": 0,
+      "maxMs": 0
+    },
+    "apiDbFallback": {
+      "count": 0,
+      "avgMs": 0,
+      "minMs": 0,
+      "maxMs": 0
+    }
+  },
+  "rows": [
+    {
+      "round": 1,
+      "oracleId": 1,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 71,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 2,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 44,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 3,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 43,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 4,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 43,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 5,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 42,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 6,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 42,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 7,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 42,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 8,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 41,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 9,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 42,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    },
+    {
+      "round": 1,
+      "oracleId": 10,
+      "ok": false,
+      "status": 0,
+      "latencyMs": 40,
+      "source": "error",
+      "error": "Request failed with status code 404"
+    }
+  ]
+}

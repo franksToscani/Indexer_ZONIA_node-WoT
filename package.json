@@ -9,9 +9,12 @@
     "listener": "node src/scripts/listener.js",
     "db:init": "node src/scripts/initDb.js",
     "td:load": "node src/scripts/loadTds.js",
+    "td:seed-large": "node src/scripts/seedLargeTds.js",
     "did:lookup": "node src/scripts/getRegisteredDid.js",
     "stake:approve": "node src/scripts/approveStake.js",
-    "demo:start": "node src/scripts/demoStart.js"
+    "demo:start": "node src/scripts/demoStart.js",
+    "benchmark:indexer": "node src/scripts/benchmarkIndexer.js",
+    "benchmark:api": "node src/scripts/benchmarkApiLatency.js"
   },
   "repository": {
     "type": "git",

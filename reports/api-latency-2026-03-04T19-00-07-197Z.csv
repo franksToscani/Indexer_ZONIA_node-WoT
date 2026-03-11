@@ -1,0 +1,11 @@
+round,oracleId,ok,status,latencyMs,source,error
+1,1,true,200,300,db,""
+1,2,true,200,824,db,""
+1,3,true,200,504,db,""
+1,4,true,200,556,db,""
+1,5,true,200,982,db,""
+1,6,true,200,672,db,""
+1,7,true,200,778,db,""
+1,8,true,200,472,db,""
+1,9,true,200,423,db,""
+1,10,true,200,721,db,""
