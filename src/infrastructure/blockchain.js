@@ -208,6 +208,7 @@ class BlockchainService {
 
             let requiredType = "";
             try {
+                // Leggo la richiesta on-chain per estrarre la query (requiredType)
                 const request = await this.requestGate.getRequest(requestId);
                 requiredType = request.query;
                 console.log(`   Query richiesta: ${requiredType}`);
@@ -273,7 +274,7 @@ class BlockchainService {
 
     /**
      * Recupera i TD memorizzati per una richiesta specifica
-     * 
+        * Ritorna un array di TD se trovati, altrimenti array vuoto
      * Questa funzione è chiamata da dataController quando l'oracle
      * chiama GET /data/:requestId.
      */

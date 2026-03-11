@@ -43,6 +43,7 @@ async function startListener() {
 
         // STEP 3: handler per le richieste
         const onRequestHandler = async (requestId, requiredType) => {
+            console.log(`\n Nuova richiesta arrivata: ${requestId}`);
             // Cerchia nel database le TD che hanno il @type richiesto
             const tds = await tdMatchService.findCompatibleTds(requiredType);
 
@@ -50,7 +51,7 @@ async function startListener() {
                 // Chiama applyToRequest() sul contratto RequestGate
                 // Questo registra la nostra offerta on-chain
                 await blockchain.applyToRequest(requestId);
-                
+                console.log(` Offerta registrata on-chain per la richiesta: ${requestId}`);
                 // Layer 1: Memory cache (same process performance)
                 // Memorizza i TD in una Map all'interno di BlockchainService
                 // Quando l'oracle chiama GET /data/:requestId,

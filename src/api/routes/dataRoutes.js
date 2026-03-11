@@ -3,12 +3,9 @@ const dataController = require("../controllers/dataController");
 
 /**
  * Data Routes
- * 
  * Definisce le route per fornire Thing Descriptions agli oracoli
- * 
  * Route disponibile:
  * - GET /data/:requestId
- *   Parametri: requestId (path param) - ID della richiesta
  *   Response: { requestId, count, data: [...] }
  */
 
